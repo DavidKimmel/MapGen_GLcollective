@@ -1,0 +1,77 @@
+.city-search {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.city-search label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.city-search input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.city-search input:focus {
+  outline: none;
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+}
+
+.city-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0 0 6px 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.city-search-dropdown li {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.city-search-dropdown li:hover {
+  background: #f0f4ff;
+}
+
+.city-search-dropdown li:last-child {
+  border-bottom: none;
+}
+
+.display-name-fields {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.display-name-fields label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.display-name-fields input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 14px;
+  margin-top: 2px;
+}

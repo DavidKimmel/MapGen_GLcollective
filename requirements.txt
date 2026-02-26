@@ -1,0 +1,28 @@
+# GIS / mapping
+osmnx==2.0.7
+geopandas==1.1.2
+shapely==2.1.2
+pyproj==3.7.2
+pyogrio==0.12.1
+networkx==3.6.1
+
+# Geocoding
+geopy==2.4.1
+lat-lon-parser==1.3.1
+
+# Graphics / rendering
+matplotlib==3.10.8
+pillow==12.1.0
+scipy==1.16.3
+fonttools==4.61.1
+
+# Data
+numpy==2.4.0
+pandas==2.3.3
+
+# Web framework
+flask
+flask-cors
+
+# HTTP
+requests==2.32.5

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/MapToPoster/*.py)",
+      "Bash(cd:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(cd C:/MapGen && python app.py 2>&1)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
+    ]
+  }
+}

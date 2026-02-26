@@ -1,0 +1,10 @@
+[project]
+name = "mapgen"
+version = "0.1.0"
+description = "Unified Etsy Map Poster Generator — print-quality 300 DPI map posters"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

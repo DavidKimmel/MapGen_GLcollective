@@ -1,0 +1,16 @@
+{
+  "name": "Minimalist",
+  "description": "Clean white background with black roads - classic Etsy best-seller aesthetic",
+  "bg": "#FFFFFF",
+  "text": "#000000",
+  "gradient_color": "#FFFFFF",
+  "water": "#F0F0F0",
+  "parks": "#F5F5F5",
+  "buildings": "#EFEFEF",
+  "road_motorway": "#000000",
+  "road_primary": "#1A1A1A",
+  "road_secondary": "#3A3A3A",
+  "road_tertiary": "#5A5A5A",
+  "road_residential": "#8A8A8A",
+  "road_default": "#5A5A5A"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Watercolor",
+  "description": "Clean cartographic style - white canvas with painted water and parks, fine dark roads",
+  "bg": "#FAFAFA",
+  "text": "#2C2C2C",
+  "gradient_color": "#FAFAFA",
+  "water": "#B8D4E3",
+  "parks": "#C5DEB5",
+  "buildings": "#EAEAEA",
+  "road_motorway": "#2C2C2C",
+  "road_primary": "#3D3D3D",
+  "road_secondary": "#555555",
+  "road_tertiary": "#777777",
+  "road_residential": "#999999",
+  "road_default": "#777777"
+}

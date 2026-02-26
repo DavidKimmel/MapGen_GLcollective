@@ -1,0 +1,74 @@
+.poster-controls {
+  margin-bottom: 16px;
+}
+
+.poster-controls > label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.poster-controls input[type="range"] {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.section-label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.size-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset-btn {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-btn:hover {
+  border-color: #4a90d9;
+}
+
+.preset-btn.active {
+  background: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+}
+
+.controls-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: flex-end;
+}
+
+.controls-row label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Minimalist Cream",
+  "description": "Warm cream background with dark charcoal roads - elegant vintage-modern blend",
+  "bg": "#FAF7F2",
+  "text": "#2C2C2C",
+  "gradient_color": "#FAF7F2",
+  "water": "#EDE8E0",
+  "parks": "#F0EDE6",
+  "buildings": "#F1E9DB",
+  "road_motorway": "#2C2C2C",
+  "road_primary": "#3D3D3D",
+  "road_secondary": "#5A5A5A",
+  "road_tertiary": "#7A7A7A",
+  "road_residential": "#A0A0A0",
+  "road_default": "#7A7A7A"
+}

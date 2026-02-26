@@ -1,0 +1,16 @@
+{
+  "name": "Ink Contrast",
+  "description": "Dramatic black water on light ground - water bodies become bold ink silhouettes",
+  "bg": "#F0F0F0",
+  "text": "#1A1A1A",
+  "gradient_color": "#F0F0F0",
+  "water": "#1A1A1A",
+  "parks": "#E8E8E8",
+  "buildings": "#E0E0E0",
+  "road_motorway": "#1A1A1A",
+  "road_primary": "#2A2A2A",
+  "road_secondary": "#4A4A4A",
+  "road_tertiary": "#6A6A6A",
+  "road_residential": "#8A8A8A",
+  "road_default": "#6A6A6A"
+}
