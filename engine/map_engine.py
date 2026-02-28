@@ -38,7 +38,7 @@ _PROJECTED_CACHE_MAX = 64
 def project_cached(gdf: GeoDataFrame, target_crs, cache_key: str) -> GeoDataFrame:
     """Project a GeoDataFrame to target CRS with caching."""
     crs_str = str(target_crs)
-    k = (cache_key, crs_str)
+    k = (cache_key, crs_str, id(gdf))
     if k in _projected_cache:
         return _projected_cache[k]
     projected = gdf.to_crs(target_crs)

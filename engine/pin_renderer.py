@@ -77,11 +77,15 @@ for _d in (_FA_PIN_D, _FA_HEART_D, _FA_HOUSE_D, _FA_GRADCAP_D):
 
 
 def _svg_path_to_mpl(d: str, cx: float, cy: float, size: float,
-                     vbw: float, vbh: float) -> MplPath:
+                     vbw: float, vbh: float,
+                     anchor: str = "center") -> MplPath:
     """Convert an SVG path 'd' attribute to a matplotlib Path.
 
     Supports M, L, H, V, C, S, Q, T, A, Z (absolute & relative).
     Y axis is flipped (SVG y-down -> matplotlib y-up).
+
+    anchor: "center" places (cx, cy) at the shape center.
+            "bottom" places (cx, cy) at the bottom tip of the shape.
     """
     tokens = _PARSED_TOKENS.get(d) or _TOKEN_RE.findall(d)
 
@@ -202,9 +206,16 @@ def _svg_path_to_mpl(d: str, cx: float, cy: float, size: float,
 
     verts = np.array(raw_verts, dtype=float)
     scale = size / max(vbw, vbh)
-    vb_cx, vb_cy = vbw / 2.0, vbh / 2.0
+    vb_cx = vbw / 2.0
+    vb_cy = vbh / 2.0
     verts[:, 0] = (verts[:, 0] - vb_cx) * scale + cx
     verts[:, 1] = -(verts[:, 1] - vb_cy) * scale + cy
+
+    if anchor == "bottom":
+        # Shift shape up so its lowest point sits at (cx, cy)
+        min_y = verts[:, 1].min()
+        verts[:, 1] += (cy - min_y)
+
     return MplPath(verts, raw_codes)
 
 
@@ -253,22 +264,28 @@ def _arc_to_lines(verts, codes, x1, y1, rx, ry, x_rot_deg,
 
 
 def _svg_teardrop(cx, cy, size):
-    path = _svg_path_to_mpl(_FA_PIN_D, cx, cy, size, _FA_PIN_VBW, _FA_PIN_VBH)
-    head_offset = (256 - 192) * (size / _FA_PIN_VBH)
-    head_cy = cy + head_offset
+    path = _svg_path_to_mpl(_FA_PIN_D, cx, cy, size, _FA_PIN_VBW, _FA_PIN_VBH,
+                            anchor="bottom")
+    # Head circle is in the upper portion of the pin
+    # After bottom-anchoring, the pin extends upward from cy
+    pin_height = size  # total height after scaling
+    head_cy = cy + pin_height * 0.62  # circle center is ~62% up from bottom
     return path, head_cy
 
 
-def _svg_heart(cx, cy, size):
-    return _svg_path_to_mpl(_FA_HEART_D, cx, cy, size, _FA_HEART_VBW, _FA_HEART_VBH)
+def _svg_heart(cx, cy, size, anchor: str = "bottom"):
+    return _svg_path_to_mpl(_FA_HEART_D, cx, cy, size, _FA_HEART_VBW, _FA_HEART_VBH,
+                            anchor=anchor)
 
 
 def _svg_house(cx, cy, size):
-    return _svg_path_to_mpl(_FA_HOUSE_D, cx, cy, size, _FA_HOUSE_VBW, _FA_HOUSE_VBH)
+    return _svg_path_to_mpl(_FA_HOUSE_D, cx, cy, size, _FA_HOUSE_VBW, _FA_HOUSE_VBH,
+                            anchor="bottom")
 
 
 def _svg_gradcap(cx, cy, size):
-    return _svg_path_to_mpl(_FA_GRADCAP_D, cx, cy, size, _FA_GRADCAP_VBW, _FA_GRADCAP_VBH)
+    return _svg_path_to_mpl(_FA_GRADCAP_D, cx, cy, size, _FA_GRADCAP_VBW, _FA_GRADCAP_VBH,
+                            anchor="bottom")
 
 
 def geocode_address(address: str, near_city: str | None = None) -> tuple[float, float]:
@@ -349,7 +366,7 @@ def render_pin(ax, lat: float, lon: float, crs, pin_style: int = 1,
             path, facecolor=color, edgecolor='white',
             linewidth=1.5, zorder=20, clip_on=False,
         ))
-        inner = _svg_heart(x, head_cy, pin_size * 0.35)
+        inner = _svg_heart(x, head_cy, pin_size * 0.35, anchor="center")
         ax.add_patch(PathPatch(
             inner, facecolor='white', edgecolor='none',
             zorder=21, clip_on=False,

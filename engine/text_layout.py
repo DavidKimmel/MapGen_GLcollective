@@ -235,9 +235,15 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         if preset.get("line2_letterspaced") and is_latin_script(line2):
             display_line2 = WIDE_SPACE.join(list(display_line2))
 
+        # Script/cursive titles have larger descenders — nudge line 2 down
+        # to visually balance spacing between all three lines
+        line2_y = bottom["line_2_y"]
+        if preset["name"] in ("script", "cursive"):
+            line2_y = 0.062
+
         font_line2 = _get_font(preset, "body", line2_size)
         fig.text(
-            0.5, bottom["line_2_y"],
+            0.5, line2_y,
             display_line2,
             color=text_secondary,
             ha="center", va="center",

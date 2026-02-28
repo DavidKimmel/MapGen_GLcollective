@@ -101,7 +101,7 @@ def gelato_export(job_id):
         return jsonify({"error": "Source file not found"}), 404
 
     body = request.get_json(force=True) if request.is_json else {}
-    sizes = body.get("sizes")
+    sizes = body.get("sizes") or [job["size"]]
     bg_color = body.get("bg_color", "#F5F2ED")
 
     try:

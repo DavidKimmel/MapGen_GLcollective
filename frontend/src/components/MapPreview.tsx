@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import { useMap } from "react-leaflet";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import CanvasOverlay from "./CanvasOverlay";
 import "./MapPreview.css";
@@ -17,16 +17,14 @@ interface Props {
 
 /**
  * Convert distance (meters) to approximate Leaflet zoom level.
- * Uses the standard Web Mercator formula:
- *   metersPerPixel = 156543.03 * cos(lat) / 2^zoom
- * We target ~600px map width as reference.
+ * Uses the standard Web Mercator formula.
  */
 function distanceToZoom(distMeters: number, latDeg: number): number {
   const latRad = (latDeg * Math.PI) / 180;
   const refPixels = 600;
   const metersPerPixel = (distMeters * 2) / refPixels;
   const zoom = Math.log2((156543.03 * Math.cos(latRad)) / metersPerPixel);
-  return Math.max(1, Math.min(18, Math.round(zoom)));
+  return Math.max(1, Math.min(18, zoom)); // no rounding — allow fractional zoom
 }
 
 /**
@@ -40,37 +38,11 @@ function zoomToDistance(zoom: number, latDeg: number): number {
 }
 
 /**
- * Compute fitBounds corners from center, distance, and aspect ratio.
+ * MapSync handles programmatic view changes and relays user interactions
+ * back to React state. The key principle: only animate the map when the
+ * center changes from an external source (city search, pin placement),
+ * never in response to the user's own panning.
  */
-function distanceToBounds(
-  center: [number, number],
-  distance: number,
-  aspectRatio: number,
-): L.LatLngBoundsExpression {
-  const [lat, lon] = center;
-  const latRad = (lat * Math.PI) / 180;
-  const metersPerDegLat = 111320;
-  const metersPerDegLon = 111320 * Math.cos(latRad);
-
-  let halfLatDeg: number;
-  let halfLonDeg: number;
-
-  if (aspectRatio > 1) {
-    // Wider than tall
-    halfLonDeg = distance / metersPerDegLon;
-    halfLatDeg = halfLonDeg / aspectRatio;
-  } else {
-    // Taller than wide
-    halfLatDeg = distance / metersPerDegLat;
-    halfLonDeg = halfLatDeg * aspectRatio;
-  }
-
-  return [
-    [lat - halfLatDeg, lon - halfLonDeg],
-    [lat + halfLatDeg, lon + halfLonDeg],
-  ];
-}
-
 function MapSync({
   center,
   distance,
@@ -85,57 +57,68 @@ function MapSync({
   onCenterChange: (c: [number, number]) => void;
 }) {
   const map = useMap();
-  const flyingRef = useRef(false);
-  const skipZoomRef = useRef(false);
+  const programmaticRef = useRef(false);
+  const prevCenterRef = useRef<[number, number]>(center);
 
+  // Fly to new center only when it genuinely changes from an external source
+  // (city search, pin geocode) — detected by comparing against previous value.
   useEffect(() => {
-    flyingRef.current = true;
-    skipZoomRef.current = true;
-    map.flyTo(center, distanceToZoom(distance, center[0]), { duration: 1.5 });
+    const [prevLat, prevLon] = prevCenterRef.current;
+    const [newLat, newLon] = center;
+
+    // Skip if coordinates haven't meaningfully changed (from user's own pan)
+    if (Math.abs(prevLat - newLat) < 0.0001 && Math.abs(prevLon - newLon) < 0.0001) {
+      return;
+    }
+
+    prevCenterRef.current = center;
+    programmaticRef.current = true;
+    map.flyTo(center, distanceToZoom(distance, center[0]), { duration: 1.2 });
+
     const timer = setTimeout(() => {
-      flyingRef.current = false;
-      skipZoomRef.current = false;
-    }, 1600);
+      programmaticRef.current = false;
+    }, 1300);
     return () => clearTimeout(timer);
   }, [center]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Adjust view when distance or aspect ratio changes (from slider/size picker)
   useEffect(() => {
-    if (flyingRef.current) return;
-    skipZoomRef.current = true;
+    if (programmaticRef.current) return;
+    programmaticRef.current = true;
 
-    const bounds = distanceToBounds(center, distance, aspectRatio);
-    map.fitBounds(bounds, { padding: [40, 40], animate: true, duration: 0.3 });
+    const zoom = distanceToZoom(distance, center[0]);
+    map.setZoom(zoom, { animate: true });
 
     const timer = setTimeout(() => {
-      skipZoomRef.current = false;
+      programmaticRef.current = false;
     }, 400);
     return () => clearTimeout(timer);
   }, [distance, aspectRatio]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    function onZoom() {
-      if (skipZoomRef.current) return;
-      const z = map.getZoom();
-      const c = map.getCenter();
-      onDistanceChange(zoomToDistance(z, c.lat));
-    }
-    map.on("zoomend", onZoom);
-    return () => {
-      map.off("zoomend", onZoom);
-    };
+  // Relay user panning back to React state
+  const onMoveEnd = useCallback(() => {
+    if (programmaticRef.current) return;
+    const c = map.getCenter();
+    prevCenterRef.current = [c.lat, c.lng];
+    onCenterChange([c.lat, c.lng]);
+  }, [map, onCenterChange]);
+
+  // Relay user zooming back to distance state
+  const onZoomEnd = useCallback(() => {
+    if (programmaticRef.current) return;
+    const z = map.getZoom();
+    const c = map.getCenter();
+    onDistanceChange(zoomToDistance(z, c.lat));
   }, [map, onDistanceChange]);
 
   useEffect(() => {
-    function onMove() {
-      if (flyingRef.current) return;
-      const c = map.getCenter();
-      onCenterChange([c.lat, c.lng]);
-    }
-    map.on("moveend", onMove);
+    map.on("moveend", onMoveEnd);
+    map.on("zoomend", onZoomEnd);
     return () => {
-      map.off("moveend", onMove);
+      map.off("moveend", onMoveEnd);
+      map.off("zoomend", onZoomEnd);
     };
-  }, [map, onCenterChange]);
+  }, [map, onMoveEnd, onZoomEnd]);
 
   return null;
 }
@@ -156,6 +139,9 @@ export default function MapPreview({
         zoom={distanceToZoom(distance, center[0])}
         style={{ width: "100%", height: "100%" }}
         zoomControl={true}
+        zoomSnap={0}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={120}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -168,14 +154,9 @@ export default function MapPreview({
           onDistanceChange={onDistanceChange}
           onCenterChange={onCenterChange}
         />
-        <CanvasOverlay
-          center={center}
-          distance={distance}
-          aspectRatio={aspectRatio}
-          color={canvasColor}
-        />
         {pinLocation && <Marker position={pinLocation} />}
       </MapContainer>
+      <CanvasOverlay aspectRatio={aspectRatio} color={canvasColor} />
     </div>
   );
 }

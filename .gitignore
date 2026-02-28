@@ -33,6 +33,12 @@ Thumbs.db
 frontend/node_modules/
 frontend/dist/
 
+# Etsy
+etsy/.credentials.json
+etsy/renders/
+etsy/listings*.json
+etsy/publish_log.csv
+
 # Environment
 .env
 *.log

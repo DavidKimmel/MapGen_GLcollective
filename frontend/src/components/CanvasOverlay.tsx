@@ -1,52 +1,103 @@
-import { useMap } from "react-leaflet";
-import { useEffect } from "react";
-import L from "leaflet";
+import { useRef, useEffect, useState, useCallback } from "react";
+import "./CanvasOverlay.css";
 
 interface Props {
-  center: [number, number];
-  distance: number;
   aspectRatio: number;
   color: string;
 }
 
-export default function CanvasOverlay({ center, distance, aspectRatio, color }: Props) {
-  const map = useMap();
+interface FrameRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const PADDING = 24;
+
+function computeFrame(containerW: number, containerH: number, aspectRatio: number): FrameRect {
+  const availW = containerW - PADDING * 2;
+  const availH = containerH - PADDING * 2;
+
+  let w: number;
+  let h: number;
+
+  if (availW / availH > aspectRatio) {
+    // Container is wider than needed — height is the constraint
+    h = availH;
+    w = h * aspectRatio;
+  } else {
+    // Container is taller than needed — width is the constraint
+    w = availW;
+    h = w / aspectRatio;
+  }
+
+  return {
+    x: (containerW - w) / 2,
+    y: (containerH - h) / 2,
+    w,
+    h,
+  };
+}
+
+/**
+ * Fixed CSS overlay that masks the area outside the poster frame.
+ * The frame stays centered on screen; the user pans the map underneath.
+ */
+export default function CanvasOverlay({ aspectRatio, color }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [frame, setFrame] = useState<FrameRect>({ x: 0, y: 0, w: 0, h: 0 });
+
+  const updateFrame = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setFrame(computeFrame(el.clientWidth, el.clientHeight, aspectRatio));
+  }, [aspectRatio]);
 
   useEffect(() => {
-    const [lat, lon] = center;
+    updateFrame();
+    const el = containerRef.current;
+    if (!el) return;
 
-    const maxDim = Math.max(aspectRatio, 1);
-    const minDim = Math.min(aspectRatio, 1);
-    const compensatedDist = distance * (maxDim / minDim) / 4;
+    const ro = new ResizeObserver(updateFrame);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [updateFrame]);
 
-    const latDeg = compensatedDist / 111_320;
-    const lonDeg = compensatedDist / (111_320 * Math.cos((lat * Math.PI) / 180));
-
-    let halfLat: number, halfLon: number;
-    if (aspectRatio > 1) {
-      halfLon = lonDeg;
-      halfLat = lonDeg / aspectRatio;
-    } else {
-      halfLat = latDeg;
-      halfLon = latDeg * aspectRatio;
-    }
-
-    const bounds: L.LatLngBoundsExpression = [
-      [lat - halfLat, lon - halfLon],
-      [lat + halfLat, lon + halfLon],
-    ];
-
-    const rect = L.rectangle(bounds, {
-      color,
-      weight: 2,
-      dashArray: "8 4",
-      fill: false,
-    }).addTo(map);
-
-    return () => {
-      map.removeLayer(rect);
-    };
-  }, [map, center, distance, aspectRatio, color]);
-
-  return null;
+  return (
+    <div className="canvas-overlay" ref={containerRef}>
+      <svg width="100%" height="100%" className="canvas-overlay-svg">
+        <defs>
+          <mask id="frame-mask">
+            <rect width="100%" height="100%" fill="white" />
+            <rect
+              x={frame.x}
+              y={frame.y}
+              width={frame.w}
+              height={frame.h}
+              fill="black"
+              rx="2"
+              ry="2"
+            />
+          </mask>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(255,255,255,0.55)"
+          mask="url(#frame-mask)"
+        />
+      </svg>
+      <div
+        className="frame-border"
+        style={{
+          left: frame.x,
+          top: frame.y,
+          width: frame.w,
+          height: frame.h,
+          borderColor: color,
+        }}
+      />
+    </div>
+  );
 }

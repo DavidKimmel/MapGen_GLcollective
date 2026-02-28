@@ -54,11 +54,11 @@ def calc_dimensions(width_in: float, height_in: float, dpi: int = 300) -> dict:
 def export_for_gelato(source_path: str, output_dir: str,
                       sizes: list[str] | None = None,
                       bg_color: str = "#F5F2ED") -> list[dict]:
-    """Export a source poster image to multiple Gelato-ready sizes.
+    """Export a source poster image to Gelato-ready file(s).
 
     For each target size:
-      1. Crops source to match target aspect ratio (center crop)
-      2. Resizes to exact trim dimensions at 300 DPI
+      1. If source matches target dimensions, uses as-is (no quality loss)
+      2. Otherwise crops to target aspect ratio and resizes to 300 DPI
       3. Adds 4mm bleed by extending edge pixels outward
       4. Saves as PNG with DPI metadata
     """
@@ -101,17 +101,22 @@ def export_for_gelato(source_path: str, output_dir: str,
                        f"(~{effective_dpi:.0f} DPI). Skipping.")
             continue
 
-        # Crop to match target aspect ratio
-        if src_ratio > target_ratio:
-            new_w = int(src_h * target_ratio)
-            left = (src_w - new_w) // 2
-            cropped = source.crop((left, 0, left + new_w, src_h))
+        # Fast path: source already matches target (rendered at this size)
+        if src_w == trim_w and src_h == trim_h:
+            resized = source
+            safe_print(f"  Source matches {size_name} exactly — no crop/resize needed")
         else:
-            new_h = int(src_w / target_ratio)
-            top = (src_h - new_h) // 2
-            cropped = source.crop((0, top, src_w, top + new_h))
+            # Crop to match target aspect ratio
+            if src_ratio > target_ratio:
+                new_w = int(src_h * target_ratio)
+                left = (src_w - new_w) // 2
+                cropped = source.crop((left, 0, left + new_w, src_h))
+            else:
+                new_h = int(src_w / target_ratio)
+                top = (src_h - new_h) // 2
+                cropped = source.crop((0, top, src_w, top + new_h))
 
-        resized = cropped.resize((trim_w, trim_h), Image.LANCZOS)
+            resized = cropped.resize((trim_w, trim_h), Image.LANCZOS)
 
         # Create canvas with bleed
         canvas = Image.new("RGB", (bleed_w, bleed_h), bg_color)

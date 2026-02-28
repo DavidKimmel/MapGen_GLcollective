@@ -31,7 +31,7 @@ def submit_job(
 ) -> str:
     """Submit a poster generation job and return a job_id."""
     job_id = str(uuid.uuid4())
-    jobs[job_id] = {"status": "processing", "output_file": None, "error": None}
+    jobs[job_id] = {"status": "processing", "output_file": None, "error": None, "size": size}
 
     def run():
         try:

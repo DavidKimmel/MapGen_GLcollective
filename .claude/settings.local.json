@@ -7,7 +7,26 @@
       "Bash(grep:*)",
       "Bash(cd C:/MapGen && python app.py 2>&1)",
       "Bash(head:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "WebFetch(domain:www.etsy.com)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:developer.etsy.com)",
+      "Bash(C:/Python313/python.exe -m etsy.listing_generator --preview)",
+      "Bash(C:/Python313/python.exe -m etsy.listing_generator --city \"Washington DC\")",
+      "Bash(C:/Python313/python.exe -m etsy.listing_generator --tier 1 --output etsy/listings_tier1.json)",
+      "Bash(C:/Python313/python.exe -c \"from etsy.image_composer import generate_all_images; print\\(''Import OK''\\)\")",
+      "Bash(C:/Python313/python.exe:*)",
+      "WebFetch(domain:docs.leonardo.ai)",
+      "Bash(python -c \":*)",
+      "Bash(python -m etsy.mockup_compositor --city Chicago --templates single_white_wall)",
+      "WebFetch(domain:dynamicmockups.com)",
+      "WebFetch(domain:docs.dynamicmockups.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python:*)",
+      "Bash(git status:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)"
     ]
   }
 }

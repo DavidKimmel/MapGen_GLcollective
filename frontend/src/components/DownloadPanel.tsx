@@ -101,7 +101,8 @@ export default function DownloadPanel({
     setGelatoStatus("exporting");
     setGelatoError(null);
     try {
-      await exportGelato(jobId);
+      const sizeStr = `${settings.width}x${settings.height}`;
+      await exportGelato(jobId, [sizeStr]);
       setGelatoStatus("done");
     } catch (e) {
       setGelatoStatus("error");
