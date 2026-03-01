@@ -118,19 +118,19 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
         point: (lat, lon) center point
         dist: Distance in meters
         theme: Theme dict (controls which optional layers are fetched)
-        detail_layers: If True, fetch all 11 layers. If False, only roads+water+parks.
+        detail_layers: If True, fetch all 14 layers. If False, only roads+water+parks.
 
     Returns dict of GeoDataFrames (or None for each layer).
     """
     compensated_dist = int(dist * 1.1)
 
     # Always fetch: street network, water, parks
-    safe_print("  [1/11] Downloading street network...")
+    safe_print("  [1/14] Downloading street network...")
     g = fetch_graph(point, compensated_dist)
     if g is None:
         raise RuntimeError("Failed to retrieve street network data.")
 
-    safe_print("  [2/11] Downloading water features...")
+    safe_print("  [2/14] Downloading water features...")
     water = fetch_features(
         point, compensated_dist,
         tags={
@@ -141,7 +141,7 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
         name="water",
     )
 
-    safe_print("  [3/11] Downloading parks/green spaces...")
+    safe_print("  [3/14] Downloading parks/green spaces...")
     parks = fetch_features(
         point, compensated_dist,
         tags={"leisure": "park", "landuse": ["grass", "meadow", "forest"]},
@@ -157,39 +157,42 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
     railways = None
     landuse_misc = None
     harbor_structures = None
+    residential = None
+    leisure_extra = None
+    aeroway = None
 
     if detail_layers:
         if theme.get("buildings"):
-            safe_print("  [4/11] Downloading building footprints...")
+            safe_print("  [4/14] Downloading building footprints...")
             buildings = fetch_features(
                 point, compensated_dist,
                 tags={"building": True},
                 name="buildings",
             )
         else:
-            safe_print("  [4/11] Skipping buildings (no theme color)")
+            safe_print("  [4/14] Skipping buildings (no theme color)")
 
         if theme.get("landuse_industrial") or theme.get("landuse_commercial"):
-            safe_print("  [5/11] Downloading landuse areas...")
+            safe_print("  [5/14] Downloading landuse areas...")
             landuse = fetch_features(
                 point, compensated_dist,
                 tags={"landuse": ["industrial", "commercial", "retail", "railway"]},
                 name="landuse",
             )
         else:
-            safe_print("  [5/11] Skipping landuse (no theme colors)")
+            safe_print("  [5/14] Skipping landuse (no theme colors)")
 
         if theme.get("waterway_line"):
-            safe_print("  [6/11] Downloading waterway lines...")
+            safe_print("  [6/14] Downloading waterway lines...")
             waterway_lines = fetch_features(
                 point, compensated_dist,
                 tags={"waterway": ["river", "stream", "canal"]},
                 name="waterway_lines",
             )
         else:
-            safe_print("  [6/11] Skipping waterway lines (no theme color)")
+            safe_print("  [6/14] Skipping waterway lines (no theme color)")
 
-        safe_print("  [7/11] Downloading natural areas...")
+        safe_print("  [7/14] Downloading natural areas...")
         natural_areas = fetch_features(
             point, compensated_dist,
             tags={"natural": ["wood", "scrub", "heath", "grassland", "bare_rock"]},
@@ -197,27 +200,27 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
         )
 
         if theme.get("wetland_fill"):
-            safe_print("  [8/11] Downloading wetlands...")
+            safe_print("  [8/14] Downloading wetlands...")
             wetlands = fetch_features(
                 point, compensated_dist,
                 tags={"natural": ["wetland", "mud"]},
                 name="wetlands",
             )
         else:
-            safe_print("  [8/11] Skipping wetlands (no theme color)")
+            safe_print("  [8/14] Skipping wetlands (no theme color)")
 
         if theme.get("railway_line"):
-            safe_print("  [9/11] Downloading railways...")
+            safe_print("  [9/14] Downloading railways...")
             railways = fetch_features(
                 point, compensated_dist,
                 tags={"railway": ["rail", "light_rail", "narrow_gauge"]},
                 name="railways",
             )
         else:
-            safe_print("  [9/11] Skipping railways (no theme color)")
+            safe_print("  [9/14] Skipping railways (no theme color)")
 
         if theme.get("landuse_cemetery") or theme.get("landuse_farmland"):
-            safe_print("  [10/11] Downloading cemetery/farmland areas...")
+            safe_print("  [10/14] Downloading cemetery/farmland areas...")
             landuse_misc = fetch_features(
                 point, compensated_dist,
                 tags={"landuse": ["cemetery", "farmland", "farmyard", "allotments",
@@ -225,9 +228,9 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
                 name="landuse_misc",
             )
         else:
-            safe_print("  [10/11] Skipping cemetery/farmland (no theme colors)")
+            safe_print("  [10/14] Skipping cemetery/farmland (no theme colors)")
 
-        safe_print("  [11/11] Downloading harbor/port structures...")
+        safe_print("  [11/14] Downloading harbor/port structures...")
         harbor_structures = fetch_features(
             point, compensated_dist,
             tags={
@@ -236,8 +239,38 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
             },
             name="harbor_structures",
         )
+
+        if theme.get("landuse_residential"):
+            safe_print("  [12/14] Downloading residential/construction/recreation...")
+            residential = fetch_features(
+                point, compensated_dist,
+                tags={"landuse": ["residential", "construction", "recreation_ground"]},
+                name="residential_ext",
+            )
+        else:
+            safe_print("  [12/14] Skipping residential landuse (no theme color)")
+
+        if theme.get("leisure_extra"):
+            safe_print("  [13/14] Downloading leisure extras (pitch/garden/playground)...")
+            leisure_extra = fetch_features(
+                point, compensated_dist,
+                tags={"leisure": ["pitch", "garden", "playground", "sports_centre"]},
+                name="leisure_extra",
+            )
+        else:
+            safe_print("  [13/14] Skipping leisure extras (not enabled)")
+
+        if theme.get("aeroway_runway"):
+            safe_print("  [14/14] Downloading aeroway features...")
+            aeroway = fetch_features(
+                point, compensated_dist,
+                tags={"aeroway": True},
+                name="aeroway",
+            )
+        else:
+            safe_print("  [14/14] Skipping aeroway (no theme color)")
     else:
-        safe_print("  [4-11/11] Skipping detail layers (detail_layers=False)")
+        safe_print("  [4-14/14] Skipping detail layers (detail_layers=False)")
 
     safe_print("[OK] All data retrieved successfully!")
 
@@ -253,6 +286,9 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
         "railways": railways,
         "landuse_misc": landuse_misc,
         "harbor_structures": harbor_structures,
+        "residential": residential,
+        "leisure_extra": leisure_extra,
+        "aeroway": aeroway,
         "compensated_dist": compensated_dist,
     }
 
@@ -624,6 +660,171 @@ def render_railways(ax, railways, target_crs, theme: dict,
         linestyle=(0, (3, 3)), alpha=0.4, zorder=1.7,
     )
     safe_print(f"  Railways: {len(rl_lines)} lines")
+
+
+def render_residential(ax, residential, target_crs, theme: dict,
+                       ocean_union=None) -> None:
+    """Render residential/construction/recreation landuse as warm fill."""
+    if residential is None or residential.empty:
+        return
+    res_color = theme.get("landuse_residential")
+    if not res_color:
+        return
+    polys = residential[residential.geometry.type.isin(["Polygon", "MultiPolygon"])]
+    if polys.empty:
+        return
+    polys = project_cached(polys, target_crs, "residential_ext")
+    if ocean_union is not None:
+        try:
+            polys = polys.copy()
+            polys["geometry"] = polys.geometry.difference(ocean_union)
+            polys = polys[~polys.geometry.is_empty]
+        except Exception:
+            pass
+    patches = []
+    for _, row in polys.iterrows():
+        geom = row.geometry
+        if not geom or geom.is_empty:
+            continue
+        sub = geom.geoms if geom.geom_type == "MultiPolygon" else [geom]
+        for p in sub:
+            patches.append(MplPolygon(list(p.exterior.coords), closed=True))
+    if patches:
+        pc = PatchCollection(
+            patches, facecolor=res_color, edgecolor='none',
+            alpha=0.7, zorder=0.35,
+        )
+        ax.add_collection(pc)
+    safe_print(f"  Residential/construction/recreation: {len(patches)} polygons")
+
+
+def render_leisure_extra(ax, leisure, target_crs, theme: dict,
+                         ocean_union=None) -> None:
+    """Render extra leisure areas (pitch, garden, playground) as light green."""
+    if leisure is None or leisure.empty:
+        return
+    if not theme.get("leisure_extra"):
+        return
+    polys = leisure[leisure.geometry.type.isin(["Polygon", "MultiPolygon"])]
+    if polys.empty:
+        return
+    polys = project_cached(polys, target_crs, "leisure_extra")
+    if ocean_union is not None:
+        try:
+            polys = polys.copy()
+            polys["geometry"] = polys.geometry.difference(ocean_union)
+            polys = polys[~polys.geometry.is_empty]
+        except Exception:
+            pass
+    leisure_color = theme.get("parks", "#B8D4AC")
+    patches = []
+    for _, row in polys.iterrows():
+        geom = row.geometry
+        if not geom or geom.is_empty:
+            continue
+        sub = geom.geoms if geom.geom_type == "MultiPolygon" else [geom]
+        for p in sub:
+            patches.append(MplPolygon(list(p.exterior.coords), closed=True))
+    if patches:
+        pc = PatchCollection(
+            patches, facecolor=leisure_color, edgecolor='none',
+            alpha=0.6, zorder=0.75,
+        )
+        ax.add_collection(pc)
+    safe_print(f"  Leisure extra: {len(patches)} polygons")
+
+
+def render_aeroway(ax, aeroway, target_crs, theme: dict,
+                   zoom_scale: float, ocean_union=None) -> None:
+    """Render airport runways, taxiways, aprons, and terminals."""
+    if aeroway is None or aeroway.empty:
+        return
+    if not theme.get("aeroway_runway"):
+        return
+    gdf_proj = project_cached(aeroway, target_crs, "aeroway")
+    if ocean_union is not None:
+        try:
+            gdf_proj = gdf_proj.copy()
+            gdf_proj["geometry"] = gdf_proj.geometry.difference(ocean_union)
+            gdf_proj = gdf_proj[~gdf_proj.geometry.is_empty]
+        except Exception:
+            pass
+
+    aero_col = gdf_proj["aeroway"] if "aeroway" in gdf_proj.columns else None
+
+    # Aprons (polygon tarmac areas)
+    apron_types = {"apron", "helipad"}
+    apron_polys = gdf_proj[
+        gdf_proj.geometry.type.isin(["Polygon", "MultiPolygon"])
+    ]
+    if aero_col is not None and not apron_polys.empty:
+        apron_mask = apron_polys.index.isin(
+            gdf_proj[gdf_proj["aeroway"].isin(apron_types)].index
+        )
+        aprons = apron_polys[apron_mask]
+        if not aprons.empty:
+            patches = []
+            for _, row in aprons.iterrows():
+                geom = row.geometry
+                if not geom or geom.is_empty:
+                    continue
+                sub = geom.geoms if geom.geom_type == "MultiPolygon" else [geom]
+                for p in sub:
+                    patches.append(MplPolygon(list(p.exterior.coords), closed=True))
+            if patches:
+                apron_color = theme.get("aeroway_apron", "#D9D5CF")
+                pc = PatchCollection(
+                    patches, facecolor=apron_color, edgecolor='none',
+                    alpha=0.8, zorder=0.85,
+                )
+                ax.add_collection(pc)
+            safe_print(f"  Aeroway aprons: {len(patches)} polygons")
+
+    # Terminals — render like buildings
+    if aero_col is not None and theme.get("aeroway_terminal"):
+        terminal_types = {"terminal", "hangar"}
+        terminals = gdf_proj[
+            gdf_proj["aeroway"].isin(terminal_types) &
+            gdf_proj.geometry.type.isin(["Polygon", "MultiPolygon"])
+        ]
+        if not terminals.empty:
+            patches = []
+            for _, row in terminals.iterrows():
+                geom = row.geometry
+                if not geom or geom.is_empty:
+                    continue
+                sub = geom.geoms if geom.geom_type == "MultiPolygon" else [geom]
+                for p in sub:
+                    patches.append(MplPolygon(list(p.exterior.coords), closed=True))
+            if patches:
+                bldg_color = theme.get("buildings", "#E8E8E0")
+                pc = PatchCollection(
+                    patches, facecolor=bldg_color, edgecolor='#BBBBBB',
+                    linewidth=0.3 * zoom_scale, alpha=0.8, zorder=0.92,
+                )
+                ax.add_collection(pc)
+            safe_print(f"  Aeroway terminals: {len(patches)} polygons")
+
+    # Runways (lines)
+    lines = gdf_proj[gdf_proj.geometry.type.isin(["LineString", "MultiLineString"])]
+    if aero_col is not None and not lines.empty:
+        runway_color = theme.get("aeroway_runway", "#C8C4BC")
+        runways = lines[lines["aeroway"] == "runway"]
+        if not runways.empty:
+            runways.plot(
+                ax=ax, color=runway_color, linewidth=3.0 * zoom_scale,
+                alpha=0.9, zorder=1.5,
+            )
+            safe_print(f"  Aeroway runways: {len(runways)} lines")
+
+        taxiway_color = theme.get("aeroway_taxiway", "#D0CCC4")
+        taxiways = lines[lines["aeroway"].isin(["taxiway", "taxilane"])]
+        if not taxiways.empty:
+            taxiways.plot(
+                ax=ax, color=taxiway_color, linewidth=1.2 * zoom_scale,
+                alpha=0.8, zorder=1.45,
+            )
+            safe_print(f"  Aeroway taxiways: {len(taxiways)} lines")
 
 
 def render_paper_texture(ax, theme: dict) -> None:

@@ -265,7 +265,7 @@ def generate_city_mockups(
     """
     slug = city.slug
     city_dir = output_dir or os.path.join(RENDERS_DIR, slug)
-    hero_path = os.path.join(city_dir, f"{slug}_37th_parallel_16x20.png")
+    hero_path = os.path.join(city_dir, f"{slug}_16x20.png")
 
     if not os.path.exists(hero_path):
         print(f"  [!] No hero render found: {hero_path}")

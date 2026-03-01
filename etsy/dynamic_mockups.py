@@ -37,6 +37,20 @@ from etsy.batch_etsy_render import RENDERS_DIR
 # ---------------------------------------------------------------------------
 
 API_BASE = "https://app.dynamicmockups.com/api/v1"
+
+# Load from .env file
+def _load_env() -> None:
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+
+_load_env()
+
 API_KEY = os.environ.get("DYNAMIC_MOCKUPS_API_KEY", "")
 
 # Rate limiting
@@ -241,24 +255,22 @@ def save_selected_templates(templates: list[dict]) -> None:
 # ---------------------------------------------------------------------------
 
 def get_poster_url(city: CityListing) -> str | None:
-    """Get the public URL for a city's hero poster.
+    """Get the public Cloudinary URL for a city's hero poster.
 
-    The Dynamic Mockups API needs a publicly accessible URL.
-    For testing, we use a local file server or upload to a temporary host.
+    Reads from the Cloudinary upload manifest.
 
     Returns:
-        Public URL string, or None if not available
+        Public URL string, or None if not uploaded yet.
     """
-    # Check if we have a local poster file
-    hero_path = os.path.join(
-        RENDERS_DIR, city.slug, f"{city.slug}_37th_parallel_16x20.png"
-    )
-    if not os.path.exists(hero_path):
-        return None
+    from etsy.cloudinary_upload import load_manifest
 
-    # Return the local path — caller must ensure it's served publicly
-    # or use upload_poster_for_api() first
-    return hero_path
+    manifest = load_manifest()
+    url = manifest.get(city.slug)
+    if url:
+        return url
+
+    print(f"  [!] No Cloudinary URL for {city.slug}. Run: python -m etsy.cloudinary_upload --city {city.city}")
+    return None
 
 
 def start_local_server(port: int = 8765) -> str:
@@ -310,10 +322,9 @@ def render_city_mockups(
         return {}
 
     if image_url is None:
-        # Need a public URL — check for pre-uploaded URL
-        print("  [!] No image URL provided. The API needs a public URL.")
-        print("      Use --image-url or set up image hosting first.")
-        return {}
+        image_url = get_poster_url(city)
+        if not image_url:
+            return {}
 
     city_dir = os.path.join(RENDERS_DIR, city.slug)
     print(f"\n  Rendering mockups: {city.city}, {city.state}")
@@ -331,7 +342,7 @@ def render_city_mockups(
             mockup_uuid=mockup_uuid,
             smart_object_uuid=so_uuid,
             image_url=image_url,
-            fit="contain",
+            fit="cover",
             export_label=label,
             image_format="png",
         )

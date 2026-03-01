@@ -23,14 +23,17 @@ from engine.map_engine import (
     REFERENCE_DIST,
     fetch_all_osm_data,
     get_crop_limits,
+    render_aeroway,
     render_buildings,
     render_landuse,
     render_landuse_misc,
+    render_leisure_extra,
     render_natural_areas,
     render_ocean,
     render_paper_texture,
     render_parks,
     render_railways,
+    render_residential,
     render_water,
     render_waterway_lines,
     render_wetlands,
@@ -247,6 +250,11 @@ def render_poster(
         except Exception:
             pass
 
+    # Residential landuse (z=0.35, below natural areas)
+    if detail_layers:
+        render_residential(ax, osm_data["residential"], target_crs,
+                           theme_data, ocean_union)
+
     # Natural areas
     if detail_layers:
         render_natural_areas(ax, osm_data["natural_areas"], target_crs,
@@ -265,6 +273,11 @@ def render_poster(
                               osm_data["water"])
         render_landuse(ax, osm_data["landuse"], target_crs, theme_data, ocean_union)
 
+    # Leisure extras — pitch, garden, playground (z=0.75, between landuse and parks)
+    if detail_layers:
+        render_leisure_extra(ax, osm_data["leisure_extra"], target_crs,
+                             theme_data, ocean_union)
+
     # Parks (always)
     render_parks(ax, osm_data["parks"], target_crs, theme_data)
 
@@ -280,6 +293,11 @@ def render_poster(
     if detail_layers:
         render_railways(ax, osm_data["railways"], target_crs, theme_data,
                         zoom_scale, ocean_union)
+
+    # Aeroway features — runways, taxiways, aprons, terminals
+    if detail_layers:
+        render_aeroway(ax, osm_data["aeroway"], target_crs, theme_data,
+                       zoom_scale, ocean_union)
 
     # Paper texture (skip for low-res previews — invisible at 72 DPI)
     if dpi > 72:

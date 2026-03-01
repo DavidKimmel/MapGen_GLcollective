@@ -1,0 +1,68 @@
+[
+  {
+    "id": "natural_wooden_frame",
+    "name": "Natural Wooden Frame",
+    "mockup_uuid": "7dde29d8-37f2-440e-a584-e8857ebc049d",
+    "smart_object_uuid": "6f0abceb-e431-4a50-8c52-00ce9c87fc8d"
+  },
+  {
+    "id": "big_frame_shelf",
+    "name": "Big Frame on Shelf",
+    "mockup_uuid": "437c68af-c1c8-49ba-bb88-a689fd39c8e0",
+    "smart_object_uuid": "38f9fb6c-15cd-4afc-b27a-93a3c88c8b5d"
+  },
+  {
+    "id": "frame_wall_wood_floor",
+    "name": "Frame on a wall above a wooden floor",
+    "mockup_uuid": "29409731-14ce-4853-a8c8-bcc79ac5d0e4",
+    "smart_object_uuid": "ff7f7455-2666-42d9-bc1b-49b1637a4a56"
+  },
+  {
+    "id": "natural_wooden_frame_2",
+    "name": "Natural wooden frame (alt)",
+    "mockup_uuid": "5c83744a-8129-4ef0-b2c0-f54b848b489b",
+    "smart_object_uuid": "e985c3ef-56c3-47b2-888a-bf8ab631831e"
+  },
+  {
+    "id": "kids_playroom",
+    "name": "Frames in kids play room",
+    "mockup_uuid": "e818a5ba-d556-4578-a2e6-eb88e03e0992",
+    "smart_object_uuid": "b06218b4-1622-40a3-ab57-f4f9a86925da"
+  },
+  {
+    "id": "canvas_leaning",
+    "name": "Canvas leaning on Wall",
+    "mockup_uuid": "28d32442-cb12-4f82-aafa-2afccc9390f7",
+    "smart_object_uuid": "50371b77-a253-4bc5-bc06-5efad8f3310a"
+  },
+  {
+    "id": "portrait_on_wall",
+    "name": "A portrait on a wall",
+    "mockup_uuid": "c72ed076-8d8a-413a-863c-e057365a3567",
+    "smart_object_uuid": "55948ef7-4e6c-4312-bfec-9e3429a58219"
+  },
+  {
+    "id": "minimalist_modern",
+    "name": "Frame in minimalist modern interior",
+    "mockup_uuid": "8211d86e-074a-4a7c-967e-6731cdba17b1",
+    "smart_object_uuid": "ffef7f6a-b20a-41c4-84fa-e2e709d5b401"
+  },
+  {
+    "id": "bottom_right_detail",
+    "name": "Bottom right detail",
+    "mockup_uuid": "19344e0b-0028-4e00-9631-85f069134d00",
+    "smart_object_uuid": "29540df6-f63f-479c-b5ef-d060696d20a8"
+  },
+  {
+    "id": "plant_beside_frame",
+    "name": "Plant beside frame",
+    "mockup_uuid": "c63710f6-d8bd-4a4f-979a-9695a021dc85",
+    "smart_object_uuid": "4bb410c5-435d-4d32-adb5-c67bb977dc2e"
+  },
+  {
+    "id": "vertical_wall_art",
+    "name": "3-4 Vertical wall art 24x36",
+    "mockup_uuid": "3883a604-e88a-4a5c-9dde-ceb177de5c9d",
+    "smart_object_uuid": "76b7ba77-70de-4823-abab-4fe6ec89568b"
+  }
+]

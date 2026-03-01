@@ -53,7 +53,7 @@ def _log_result(result: dict) -> None:
 
 def _check_render(city: CityListing) -> str | None:
     """Check if a render exists for this city. Returns path or None."""
-    path = os.path.join(RENDERS_DIR, city.slug, f"{city.slug}_37th_parallel_16x20.png")
+    path = os.path.join(RENDERS_DIR, city.slug, f"{city.slug}_16x20.png")
     return path if os.path.exists(path) else None
 
 
@@ -64,7 +64,7 @@ def _collect_images(city: CityListing) -> list[str]:
     images: list[str] = []
 
     # 1. Hero image = the main rendered poster
-    hero = os.path.join(city_dir, f"{slug}_37th_parallel_16x20.png")
+    hero = os.path.join(city_dir, f"{slug}_16x20.png")
     if os.path.exists(hero):
         images.append(hero)
 

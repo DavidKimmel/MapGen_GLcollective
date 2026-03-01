@@ -35,10 +35,20 @@ LISTING_IMAGE_WIDTH = 2000
 LISTING_IMAGE_HEIGHT = 2000
 
 
-def _get_font(size: int = 36) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    """Get a clean sans-serif font for labels."""
-    # Try Montserrat first (matches brand), fall back to Arial, then default
-    for name in ("Montserrat-Medium.ttf", "Montserrat-Regular.ttf"):
+def _get_font(size: int = 36, weight: str = "regular") -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Get a clean sans-serif font for labels.
+
+    Args:
+        size: Font size in points.
+        weight: "regular", "light", or "bold".
+    """
+    if weight == "light":
+        candidates = ["Roboto-Light.ttf", "Montserrat-Variable.ttf"]
+    elif weight == "bold":
+        candidates = ["Roboto-Bold.ttf", "Montserrat-Variable.ttf"]
+    else:
+        candidates = ["Montserrat-Variable.ttf", "Roboto-Regular.ttf"]
+    for name in candidates:
         path = os.path.join(FONTS_DIR, name)
         if os.path.exists(path):
             return ImageFont.truetype(path, size)
@@ -50,18 +60,83 @@ def _get_font(size: int = 36) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
 
 def _find_render(city_slug: str, theme: str = "37th_parallel",
                  size: str = "16x20") -> str | None:
-    """Find a rendered poster PNG for a city."""
-    path = os.path.join(RENDERS_DIR, city_slug, f"{city_slug}_{theme}_{size}.png")
+    """Find a rendered poster PNG for a city.
+
+    For the default theme (37th_parallel), filenames omit the theme name.
+    Other themes include it.
+    """
+    if theme == "37th_parallel":
+        path = os.path.join(RENDERS_DIR, city_slug, f"{city_slug}_{size}.png")
+    else:
+        path = os.path.join(RENDERS_DIR, city_slug, f"{city_slug}_{theme}_{size}.png")
     if os.path.exists(path):
         return path
     return None
 
 
-def create_detail_crop(city_slug: str, output_dir: str | None = None) -> str | None:
+def _draw_detail_badge(img: Image.Image) -> Image.Image:
+    """Draw a corner badge overlay showing detail/quality text.
+
+    Places a semi-transparent badge in the top-left corner with
+    headline and subtitle text.
+    """
+    result = img.convert("RGBA")
+    w, h = result.size
+
+    # Badge dimensions relative to image size
+    margin = int(w * 0.04)
+    pad_x = int(w * 0.025)
+    pad_y = int(w * 0.018)
+
+    # Fonts
+    headline_font = _get_font(int(w * 0.032), weight="bold")
+    subtitle_font = _get_font(int(w * 0.018), weight="light")
+
+    # Text content — two lines drawn as a single block
+    full_text = "EVERY STREET.\nEVERY DETAIL."
+
+    # Measure the full text block
+    dummy = ImageDraw.Draw(result)
+    bb = dummy.multiline_textbbox((0, 0), full_text, font=headline_font, align="center")
+    text_w = bb[2] - bb[0]
+    text_h = bb[3] - bb[1]
+
+    badge_w = int(text_w + pad_x * 2)
+    badge_h = int(text_h + pad_y * 2)
+
+    # Draw semi-transparent badge background
+    badge = Image.new("RGBA", (badge_w, badge_h), (0, 0, 0, 0))
+    badge_draw = ImageDraw.Draw(badge)
+
+    # Rounded rectangle background (dark, semi-transparent)
+    radius = int(min(badge_w, badge_h) * 0.06)
+    badge_draw.rounded_rectangle(
+        [0, 0, badge_w - 1, badge_h - 1],
+        radius=radius,
+        fill=(26, 26, 26, 185),
+    )
+
+    # Draw text centered both horizontally and vertically using anchor
+    cx = badge_w // 2
+    cy = badge_h // 2
+    badge_draw.multiline_text(
+        (cx, cy), full_text,
+        fill=(255, 255, 255, 240), font=headline_font,
+        anchor="mm", align="center",
+    )
+
+    # Paste badge onto image
+    result.paste(badge, (margin, margin), badge)
+    return result.convert("RGB")
+
+
+def create_detail_crop(city_slug: str, output_dir: str | None = None,
+                       with_badge: bool = True) -> str | None:
     """Create a zoomed detail crop showing cartographic quality.
 
     Crops the center ~25% of the map area (excluding text zone) and
-    scales to 2000x2000 for Etsy listing image.
+    scales to 2000x2000 for Etsy listing image. Optionally adds a
+    corner badge with detail/quality text.
     """
     poster_path = _find_render(city_slug)
     if not poster_path:
@@ -86,10 +161,13 @@ def create_detail_crop(city_slug: str, output_dir: str | None = None) -> str | N
     cropped = img.crop((left, top, right, bottom))
     result = cropped.resize((LISTING_IMAGE_WIDTH, LISTING_IMAGE_HEIGHT), Image.LANCZOS)
 
+    if with_badge:
+        result = _draw_detail_badge(result)
+
     out_dir = output_dir or os.path.join(RENDERS_DIR, city_slug)
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, f"{city_slug}_detail_crop.png")
-    result.save(out_path, "PNG", dpi=(300, 300))
+    out_path = os.path.join(out_dir, f"{city_slug}_detail_crop.jpg")
+    result.save(out_path, "JPEG", quality=92, dpi=(300, 300))
     print(f"  [OK] Detail crop: {out_path}")
     return out_path
 
@@ -161,6 +239,7 @@ def create_size_comparison(city_slug: str, output_dir: str | None = None) -> str
     """Create a size comparison image showing 3 sizes side by side.
 
     Shows 8x10, 16x20, and 24x36 at relative scale with labels.
+    Uses Montserrat title, Roboto Light labels, dark frame outlines.
     """
     poster_path = _find_render(city_slug)
     if not poster_path:
@@ -169,68 +248,71 @@ def create_size_comparison(city_slug: str, output_dir: str | None = None) -> str
 
     img = Image.open(poster_path)
 
-    # Define sizes to show (relative proportions based on actual inches)
     sizes = [
         ('8×10"', 8, 10),
         ('16×20"', 16, 20),
         ('24×36"', 24, 36),
     ]
 
-    # Scale so the largest fits ~60% of canvas height
     canvas_w = LISTING_IMAGE_WIDTH
     canvas_h = LISTING_IMAGE_HEIGHT
-    max_h = int(canvas_h * 0.60)
-    scale = max_h / sizes[-1][2]  # pixels per inch based on largest
 
-    padding = 60
-    label_height = 80
-    font = _get_font(36)
-    small_font = _get_font(24)
+    # Scale so the largest fits ~65% of canvas height
+    max_h = int(canvas_h * 0.65)
+    scale = max_h / sizes[-1][2]
+
+    title_font = _get_font(56)
+    label_font = _get_font(32, weight="light")
 
     canvas = Image.new("RGB", (canvas_w, canvas_h), "#F8F6F2")
     draw = ImageDraw.Draw(canvas)
 
-    # Calculate total width of all posters + gaps
+    # Title — "AVAILABLE SIZES" with letter spacing
+    title = "AVAILABLE SIZES"
+    spaced_title = "  ".join(title)
+    bbox = draw.textbbox((0, 0), spaced_title, font=title_font)
+    tw = bbox[2] - bbox[0]
+    draw.text(((canvas_w - tw) // 2, 70), spaced_title, fill="#1A1A1A", font=title_font)
+
+    # Calculate layout
+    padding = 50
     total_w = sum(int(w * scale) for _, w, _ in sizes) + padding * (len(sizes) - 1)
     start_x = (canvas_w - total_w) // 2
+    baseline_y = canvas_h - 160
 
     x = start_x
-    baseline_y = canvas_h - 200  # Align bottoms
-
     for label, w_in, h_in in sizes:
         pw = int(w_in * scale)
         ph = int(h_in * scale)
         y = baseline_y - ph
 
-        # Draw shadow
-        shadow_offset = 4
-        draw.rectangle(
-            [x + shadow_offset, y + shadow_offset, x + pw + shadow_offset, y + ph + shadow_offset],
-            fill="#E0E0E0",
-        )
+        # Subtle shadow — offset and blurred look
+        shadow_offset = 6
+        for s in range(3, 0, -1):
+            alpha_color = "#E8E4E0" if s == 3 else ("#E0DCDA" if s == 2 else "#D8D4D0")
+            draw.rectangle(
+                [x + shadow_offset + s, y + shadow_offset + s,
+                 x + pw + shadow_offset + s, y + ph + shadow_offset + s],
+                fill=alpha_color,
+            )
 
         # Scale poster to this size
         thumb = img.resize((pw, ph), Image.LANCZOS)
         canvas.paste(thumb, (x, y))
 
-        # Draw thin border
-        draw.rectangle([x, y, x + pw, y + ph], outline="#CCCCCC", width=2)
+        # Dark frame outline (thin)
+        frame_color = "#2C2C2C"
+        draw.rectangle([x, y, x + pw, y + ph], outline=frame_color, width=2)
 
-        # Label below
-        bbox = draw.textbbox((0, 0), label, font=font)
+        # Size label below — centered
+        bbox = draw.textbbox((0, 0), label, font=label_font)
         text_w = bbox[2] - bbox[0]
         draw.text(
-            (x + (pw - text_w) // 2, baseline_y + 20),
-            label, fill="#333333", font=font,
+            (x + (pw - text_w) // 2, baseline_y + 16),
+            label, fill="#444444", font=label_font,
         )
 
         x += pw + padding
-
-    # Title at top
-    title = "Available Sizes"
-    bbox = draw.textbbox((0, 0), title, font=_get_font(48))
-    tw = bbox[2] - bbox[0]
-    draw.text(((canvas_w - tw) // 2, 60), title, fill="#1A1A1A", font=_get_font(48))
 
     out_dir = output_dir or os.path.join(RENDERS_DIR, city_slug)
     os.makedirs(out_dir, exist_ok=True)
@@ -255,13 +337,29 @@ def generate_all_images(city_slug: str, output_dir: str | None = None) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Etsy listing images")
-    parser.add_argument("--city", required=True, help="City name")
+    parser.add_argument("--city", default=None, help="City name")
     parser.add_argument("--detail-crop", action="store_true", help="Generate detail crop")
     parser.add_argument("--style-grid", action="store_true", help="Generate style grid")
     parser.add_argument("--size-comparison", action="store_true", help="Generate size comparison")
     parser.add_argument("--all", action="store_true", help="Generate all image types")
+    parser.add_argument("--batch-all", action="store_true",
+                        help="Generate images for all rendered cities")
     parser.add_argument("--output-dir", default=None, help="Output directory override")
     args = parser.parse_args()
+
+    if args.batch_all:
+        # Find all city dirs that have a rendered poster
+        for city_dir in sorted(Path(RENDERS_DIR).iterdir()):
+            if not city_dir.is_dir():
+                continue
+            slug = city_dir.name
+            poster = city_dir / f"{slug}_16x20.png"
+            if poster.exists():
+                generate_all_images(slug, args.output_dir)
+        return
+
+    if not args.city:
+        parser.error("--city is required (or use --batch-all)")
 
     from etsy.city_list import get_city
     city = get_city(args.city)

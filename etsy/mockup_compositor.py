@@ -478,7 +478,7 @@ def composite_single_template(
 
     # Find the city's hero poster
     city_dir = os.path.join(RENDERS_DIR, city.slug)
-    hero_path = os.path.join(city_dir, f"{city.slug}_37th_parallel_16x20.png")
+    hero_path = os.path.join(city_dir, f"{city.slug}_16x20.png")
     if not os.path.exists(hero_path):
         print(f"  [!] No hero render: {hero_path}")
         return None
@@ -545,7 +545,7 @@ def _assign_posters_to_frames(
         for oc in other_cities[:num_frames - 1]:
             oc_path = os.path.join(
                 RENDERS_DIR, oc.slug,
-                f"{oc.slug}_37th_parallel_16x20.png"
+                f"{oc.slug}_16x20.png"
             )
             if os.path.exists(oc_path):
                 all_posters.append(Image.open(oc_path).convert("RGB"))
@@ -561,7 +561,7 @@ def _assign_posters_to_frames(
         for oc in same_tier[:num_frames - 1]:
             oc_path = os.path.join(
                 RENDERS_DIR, oc.slug,
-                f"{oc.slug}_37th_parallel_16x20.png"
+                f"{oc.slug}_16x20.png"
             )
             if os.path.exists(oc_path):
                 all_posters.append(Image.open(oc_path).convert("RGB"))
