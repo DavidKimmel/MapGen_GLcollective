@@ -38,6 +38,8 @@ etsy/.credentials.json
 etsy/renders/
 etsy/listings*.json
 etsy/publish_log.csv
+etsy/TUR2/
+etsy/posters_small/
 
 # Environment
 .env
