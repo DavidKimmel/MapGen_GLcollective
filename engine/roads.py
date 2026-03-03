@@ -64,13 +64,18 @@ def get_edge_widths_by_type(highway_types: list[str], zoom_scale: float) -> list
     return [ROAD_WIDTHS.get(hw, 0.15) * zoom_scale for hw in highway_types]
 
 
-def render_roads(ax, gdf_edges_full, theme: dict, dist: int) -> None:
+def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
+                 fig_scale: float = 1.0) -> None:
     """Render roads with hierarchy-based colors and widths.
 
     Roads are rendered in tier order (minor below major) so intersections
     look clean with major roads on top.
+
+    Args:
+        fig_scale: Figure size scaling factor (1.0 = reference 16x20 size).
+                   Adjusts linewidths so roads look consistent across print sizes.
     """
-    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / dist))
+    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / dist)) * fig_scale
     safe_print(f"  Zoom scale: {zoom_scale:.2f} (dist={dist}m)")
 
     gdf_edges = gdf_edges_full["geometry"]

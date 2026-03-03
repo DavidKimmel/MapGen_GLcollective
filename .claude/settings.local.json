@@ -26,7 +26,10 @@
       "Bash(python:*)",
       "Bash(git status:*)",
       "Bash(find:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(pip install:*)",
+      "WebFetch(domain:support.gelato.com)",
+      "WebFetch(domain:community.etsy.com)"
     ]
   }
 }

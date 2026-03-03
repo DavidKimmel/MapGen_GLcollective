@@ -227,7 +227,12 @@ def render_poster(
 
     # 5. Render layers (z-order)
     safe_print("\nRendering map layers...")
-    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / distance))
+    # Scale linewidths relative to the reference 16x20 figure size so all
+    # layers look consistent across print sizes (8x10 through 24x36).
+    ref_diag = (16**2 + 20**2) ** 0.5
+    cur_diag = (width_in**2 + height_in**2) ** 0.5
+    fig_scale = cur_diag / ref_diag
+    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / distance)) * fig_scale
     compensated_dist = osm_data["compensated_dist"]
 
     # Ocean (only when theme opts in via "ocean": true)
@@ -287,7 +292,7 @@ def render_poster(
 
     # Roads (always)
     gdf_edges_full = ox.graph_to_gdfs(g_proj, nodes=False)
-    render_roads(ax, gdf_edges_full, theme_data, distance)
+    render_roads(ax, gdf_edges_full, theme_data, distance, fig_scale=fig_scale)
 
     # Railways (detail only)
     if detail_layers:

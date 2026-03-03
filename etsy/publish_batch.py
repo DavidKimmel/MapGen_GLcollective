@@ -94,7 +94,6 @@ def publish_city(
     city: CityListing,
     dry_run: bool = False,
     render_only: bool = False,
-    on_sale: bool = True,
 ) -> dict:
     """Publish a single city listing end-to-end.
 
@@ -136,7 +135,7 @@ def publish_city(
 
     # Step 2: Generate listing content
     print(f"  [2/5] Generating listing content...")
-    listing_data = generate_listing(city, on_sale=on_sale)
+    listing_data = generate_listing(city)
     result["title"] = listing_data["title"]
     print(f"    Title: {listing_data['title']}")
     print(f"    Tags: {len(listing_data['tags'])}")
@@ -222,14 +221,12 @@ def publish_batch(
     cities: list[CityListing],
     dry_run: bool = False,
     render_only: bool = False,
-    on_sale: bool = True,
 ) -> list[dict]:
     """Publish multiple cities."""
     print(f"\n{'#' * 60}")
     print(f"GeoLine Collective — Batch Publisher")
     print(f"  Cities: {len(cities)}")
     print(f"  Mode: {'DRY RUN' if dry_run else 'RENDER ONLY' if render_only else 'LIVE'}")
-    print(f"  Sale pricing: {'Yes (20% off digital)' if on_sale else 'No'}")
     print(f"{'#' * 60}")
 
     results: list[dict] = []
@@ -237,7 +234,7 @@ def publish_batch(
 
     for i, city in enumerate(cities, 1):
         print(f"\n[{i}/{len(cities)}]")
-        result = publish_city(city, dry_run=dry_run, render_only=render_only, on_sale=on_sale)
+        result = publish_city(city, dry_run=dry_run, render_only=render_only)
         results.append(result)
 
     elapsed = time.time() - t0
@@ -263,7 +260,6 @@ def main():
     parser.add_argument("--all", action="store_true", help="Publish all 25 cities")
     parser.add_argument("--dry-run", action="store_true", help="Preview without API calls")
     parser.add_argument("--render-only", action="store_true", help="Just render + images, no API")
-    parser.add_argument("--no-sale", action="store_true", help="Disable launch sale pricing")
     args = parser.parse_args()
 
     if args.city:
@@ -288,7 +284,6 @@ def main():
         cities,
         dry_run=args.dry_run,
         render_only=args.render_only,
-        on_sale=not args.no_sale,
     )
 
 

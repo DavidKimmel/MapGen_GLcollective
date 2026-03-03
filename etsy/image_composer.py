@@ -236,9 +236,9 @@ def create_style_grid(city_slug: str, output_dir: str | None = None) -> str | No
 
 
 def create_size_comparison(city_slug: str, output_dir: str | None = None) -> str | None:
-    """Create a size comparison image showing 3 sizes side by side.
+    """Create a size comparison image showing all 5 sizes side by side.
 
-    Shows 8x10, 16x20, and 24x36 at relative scale with labels.
+    Shows 8x10, 11x14, 16x20, 18x24, and 24x36 at relative scale with labels.
     Uses Montserrat title, Roboto Light labels, dark frame outlines.
     """
     poster_path = _find_render(city_slug)
@@ -248,21 +248,26 @@ def create_size_comparison(city_slug: str, output_dir: str | None = None) -> str
 
     img = Image.open(poster_path)
 
-    sizes = [
+    # Two rows: top row = smaller sizes, bottom row = larger sizes
+    top_row = [
         ('8×10"', 8, 10),
+        ('11×14"', 11, 14),
+    ]
+    bottom_row = [
         ('16×20"', 16, 20),
+        ('18×24"', 18, 24),
         ('24×36"', 24, 36),
     ]
 
     canvas_w = LISTING_IMAGE_WIDTH
     canvas_h = LISTING_IMAGE_HEIGHT
 
-    # Scale so the largest fits ~65% of canvas height
-    max_h = int(canvas_h * 0.65)
-    scale = max_h / sizes[-1][2]
+    # Scale so the largest (24x36) fits ~57% of canvas height
+    max_h = int(canvas_h * 0.57)
+    scale = max_h / bottom_row[-1][2]
 
     title_font = _get_font(56)
-    label_font = _get_font(32, weight="light")
+    label_font = _get_font(28, weight="light")
 
     canvas = Image.new("RGB", (canvas_w, canvas_h), "#F8F6F2")
     draw = ImageDraw.Draw(canvas)
@@ -272,47 +277,53 @@ def create_size_comparison(city_slug: str, output_dir: str | None = None) -> str
     spaced_title = "  ".join(title)
     bbox = draw.textbbox((0, 0), spaced_title, font=title_font)
     tw = bbox[2] - bbox[0]
-    draw.text(((canvas_w - tw) // 2, 70), spaced_title, fill="#1A1A1A", font=title_font)
+    draw.text(((canvas_w - tw) // 2, 60), spaced_title, fill="#1A1A1A", font=title_font)
 
-    # Calculate layout
-    padding = 50
-    total_w = sum(int(w * scale) for _, w, _ in sizes) + padding * (len(sizes) - 1)
-    start_x = (canvas_w - total_w) // 2
-    baseline_y = canvas_h - 160
+    def _draw_row(row_sizes: list, baseline_y: int, padding: int,
+                  x_offset: int = 0) -> None:
+        """Draw a row of poster thumbnails aligned to a shared baseline."""
+        total_w = sum(int(w * scale) for _, w, _ in row_sizes) + padding * (len(row_sizes) - 1)
+        x = (canvas_w - total_w) // 2 + x_offset
 
-    x = start_x
-    for label, w_in, h_in in sizes:
-        pw = int(w_in * scale)
-        ph = int(h_in * scale)
-        y = baseline_y - ph
+        for label, w_in, h_in in row_sizes:
+            pw = int(w_in * scale)
+            ph = int(h_in * scale)
+            y = baseline_y - ph
 
-        # Subtle shadow — offset and blurred look
-        shadow_offset = 6
-        for s in range(3, 0, -1):
-            alpha_color = "#E8E4E0" if s == 3 else ("#E0DCDA" if s == 2 else "#D8D4D0")
-            draw.rectangle(
-                [x + shadow_offset + s, y + shadow_offset + s,
-                 x + pw + shadow_offset + s, y + ph + shadow_offset + s],
-                fill=alpha_color,
+            # Subtle shadow
+            shadow_offset = 5
+            for s in range(3, 0, -1):
+                alpha_color = "#E8E4E0" if s == 3 else ("#E0DCDA" if s == 2 else "#D8D4D0")
+                draw.rectangle(
+                    [x + shadow_offset + s, y + shadow_offset + s,
+                     x + pw + shadow_offset + s, y + ph + shadow_offset + s],
+                    fill=alpha_color,
+                )
+
+            # Scale poster to this size
+            thumb = img.resize((pw, ph), Image.LANCZOS)
+            canvas.paste(thumb, (x, y))
+
+            # Dark frame outline
+            draw.rectangle([x, y, x + pw, y + ph], outline="#2C2C2C", width=2)
+
+            # Size label below — centered
+            bbox = draw.textbbox((0, 0), label, font=label_font)
+            text_w = bbox[2] - bbox[0]
+            draw.text(
+                (x + (pw - text_w) // 2, baseline_y + 12),
+                label, fill="#444444", font=label_font,
             )
 
-        # Scale poster to this size
-        thumb = img.resize((pw, ph), Image.LANCZOS)
-        canvas.paste(thumb, (x, y))
+            x += pw + padding
 
-        # Dark frame outline (thin)
-        frame_color = "#2C2C2C"
-        draw.rectangle([x, y, x + pw, y + ph], outline=frame_color, width=2)
+    # Top row: 8x10, 11x14 — positioned in upper portion, shifted right
+    top_baseline = int(canvas_h * 0.42)
+    _draw_row(top_row, top_baseline, padding=40, x_offset=-500)
 
-        # Size label below — centered
-        bbox = draw.textbbox((0, 0), label, font=label_font)
-        text_w = bbox[2] - bbox[0]
-        draw.text(
-            (x + (pw - text_w) // 2, baseline_y + 16),
-            label, fill="#444444", font=label_font,
-        )
-
-        x += pw + padding
+    # Bottom row: 16x20, 18x24, 24x36 — positioned in lower portion
+    bottom_baseline = canvas_h - 110
+    _draw_row(bottom_row, bottom_baseline, padding=35)
 
     out_dir = output_dir or os.path.join(RENDERS_DIR, city_slug)
     os.makedirs(out_dir, exist_ok=True)

@@ -28,15 +28,28 @@ if TYPE_CHECKING:
 # Pricing (from business plan Section 4.2)
 # ---------------------------------------------------------------------------
 
-DIGITAL_PRICE = 10.00       # Pre-made city map digital (launch: 20% off = $8.00)
-LAUNCH_SALE_PCT = 0.20      # 20% off for first 60 days
+DIGITAL_PRICES: dict[str, float] = {
+    "8x10":  4.99,
+    "11x14": 5.99,
+    "16x20": 7.99,
+    "18x24": 8.99,
+    "24x36": 9.99,
+}
 
-PHYSICAL_PRICES: dict[str, float] = {
-    "8x10":  28.00,
-    "11x14": 38.00,
-    "16x20": 52.00,
-    "18x24": 62.00,
-    "24x36": 72.00,
+UNFRAMED_PRICES: dict[str, float] = {
+    "8x10":  32.00,
+    "11x14": 39.00,
+    "16x20": 44.00,
+    "18x24": 49.00,
+    "24x36": 59.00,
+}
+
+FRAMED_PRICES: dict[str, float] = {
+    "8x10":  75.00,
+    "11x14": 89.00,
+    "16x20": 115.00,
+    "18x24": 129.00,
+    "24x36": 209.00,
 }
 
 # ---------------------------------------------------------------------------
@@ -70,7 +83,7 @@ _STATE_ABBREV: dict[str, str] = {v: k for k, v in _US_STATES.items()}
 _QUALITY_DESCRIPTORS = [
     "Premium Street Map Wall Art",
     "Detailed Street Map Wall Art",
-    "Minimalist Street Map Art",
+    "High Quality City Map Poster",
     "Modern City Map Wall Art",
 ]
 
@@ -154,57 +167,37 @@ The perfect gift for anyone who loves {city}. Whether it's a housewarming, \
 anniversary, or just because — this premium street map print captures the \
 beauty of {city_full} in stunning cartographic detail.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 WHAT YOU GET
-
-✦ Digital Download — High-resolution 300 DPI PNG file, ready to print at \
-home or at any print shop
-✦ Physical Print — Museum-quality poster printed on premium matte paper, \
-shipped directly to you via our print partner
+✦ Digital Download — High-resolution 300 DPI PNG file, ready to print at home or at any print shop
+✦ Physical Print — Museum-quality poster printed on premium matte paper, shipped directly to you via our print partner
 ✦ Framed Option — Choose black, white, or natural wood frame in any size
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 AVAILABLE SIZES
-
 • 8×10" — Perfect for desks, shelves, or small wall spaces
 • 11×14" — Ideal for standard frames and gallery walls
 • 16×20" — Our most popular size — great statement piece
 • 18×24" — Large format for living rooms and offices
 • 24×36" — Maximum impact — stunning above a sofa or bed
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 DETAILS
-
 • Designed with professional GIS cartographic data — not auto-generated
 • Every street, waterway, park, and building footprint rendered at 300+ DPI
 • Clean, modern aesthetic that complements any home decor
 • Printed on archival-quality heavyweight matte paper (physical orders)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 PERSONALIZATION
-
 Want a custom location, specific address with a pin marker, or custom text? \
 Check out our Custom Map listing for fully personalized options:
 → Custom text lines (names, dates, coordinates, quotes)
 → Pin marker on any address (heart, pin, house, or graduation cap)
 → 5 font styles to choose from
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 PROCESSING & SHIPPING
-
 ✦ Digital: Instant download after purchase
 ✦ Physical prints: 3-5 business days production + shipping
 ✦ Ships from the US via our premium print partner
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 PERFECT FOR
-
 ♥ Housewarming gifts
 ♥ Anniversary & wedding gifts
 ♥ New home celebrations
@@ -254,30 +247,38 @@ class ListingVariant:
         }
 
 
-def _generate_variants(city: CityListing, on_sale: bool = True) -> list[ListingVariant]:
+def _generate_variants(city: CityListing) -> list[ListingVariant]:
     """Generate all purchasable variants for a city listing."""
     variants: list[ListingVariant] = []
-    slug = city.slug
+    slug = city.slug.upper()
 
-    # Digital download (one size — buyer prints at their chosen size)
-    price = DIGITAL_PRICE
-    if on_sale:
-        price = round(DIGITAL_PRICE * (1 - LAUNCH_SALE_PCT), 2)
-    variants.append(ListingVariant(
-        size="digital",
-        format="digital",
-        price=price,
-        sku=f"GLC-{slug.upper()}-DIG",
-    ))
+    # Digital downloads (per size)
+    for size_key, price in DIGITAL_PRICES.items():
+        variants.append(ListingVariant(
+            size=size_key,
+            format="digital",
+            price=price,
+            sku=f"GLC-{slug}-DIG-{size_key.replace('x', 'X')}",
+        ))
 
     # Physical prints (unframed, each size)
-    for size_key, base_price in PHYSICAL_PRICES.items():
+    for size_key, price in UNFRAMED_PRICES.items():
         variants.append(ListingVariant(
             size=size_key,
             format="physical_unframed",
-            price=base_price,
-            sku=f"GLC-{slug.upper()}-{size_key.replace('x', 'X')}",
+            price=price,
+            sku=f"GLC-{slug}-UNF-{size_key.replace('x', 'X')}",
         ))
+
+    # Framed prints (black and white same price, each size)
+    for size_key, price in FRAMED_PRICES.items():
+        for frame_color in ("black", "white"):
+            variants.append(ListingVariant(
+                size=size_key,
+                format=f"framed_{frame_color}",
+                price=price,
+                sku=f"GLC-{slug}-FR{frame_color[0].upper()}-{size_key.replace('x', 'X')}",
+            ))
 
     return variants
 
@@ -289,14 +290,12 @@ def _generate_variants(city: CityListing, on_sale: bool = True) -> list[ListingV
 def generate_listing(
     city: CityListing,
     variant_idx: int = 0,
-    on_sale: bool = True,
 ) -> dict:
     """Generate a complete Etsy listing data structure for a city.
 
     Args:
         city: CityListing from city_list.py
         variant_idx: Index for rotating quality descriptors / gift occasions
-        on_sale: Apply launch sale discount to digital price
 
     Returns:
         Dict with title, description, tags, price, variants, and metadata.
@@ -304,7 +303,7 @@ def generate_listing(
     title = _generate_title(city, variant_idx)
     description = _generate_description(city)
     tags = _generate_tags(city)
-    variants = _generate_variants(city, on_sale=on_sale)
+    variants = _generate_variants(city)
 
     return {
         "city": city.city,
@@ -314,7 +313,7 @@ def generate_listing(
         "title": title,
         "description": description,
         "tags": tags,
-        "base_price": variants[0].price,  # Digital price (lowest)
+        "base_price": variants[0].price,  # Smallest digital price
         "variants": [v.to_dict() for v in variants],
         "lat": city.lat,
         "lon": city.lon,
@@ -326,13 +325,11 @@ def generate_listing(
 
 def generate_all_listings(
     tier: int | None = None,
-    on_sale: bool = True,
 ) -> list[dict]:
     """Generate listings for all cities (or a specific tier).
 
     Args:
         tier: If set, only generate for that tier (1, 2, or 3). None = all.
-        on_sale: Apply launch sale discount.
 
     Returns:
         List of listing dicts.
@@ -341,7 +338,7 @@ def generate_all_listings(
 
     cities = get_cities_by_tier(tier) if tier else ALL_CITIES
     return [
-        generate_listing(city, variant_idx=i, on_sale=on_sale)
+        generate_listing(city, variant_idx=i)
         for i, city in enumerate(cities)
     ]
 
@@ -349,13 +346,12 @@ def generate_all_listings(
 def export_listings_json(
     output_path: str = "etsy/listings.json",
     tier: int | None = None,
-    on_sale: bool = True,
 ) -> str:
     """Generate all listings and write to JSON file.
 
     Returns the output file path.
     """
-    listings = generate_all_listings(tier=tier, on_sale=on_sale)
+    listings = generate_all_listings(tier=tier)
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(listings, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -374,7 +370,6 @@ if __name__ == "__main__":
     parser.add_argument("--tier", type=int, default=None, help="Tier to generate (1/2/3, default: all)")
     parser.add_argument("--city", type=str, default=None, help="Generate for a single city")
     parser.add_argument("--output", "-o", default="etsy/listings.json", help="Output JSON path")
-    parser.add_argument("--no-sale", action="store_true", help="Disable launch sale pricing")
     parser.add_argument("--preview", action="store_true", help="Print one listing to stdout")
     args = parser.parse_args()
 
@@ -384,13 +379,13 @@ if __name__ == "__main__":
         if not city:
             print(f"City not found: {args.city}")
             raise SystemExit(1)
-        listing = generate_listing(city, on_sale=not args.no_sale)
+        listing = generate_listing(city)
         import sys
         sys.stdout.reconfigure(encoding="utf-8")
         print(json.dumps(listing, indent=2, ensure_ascii=False))
     elif args.preview:
         from etsy.city_list import TIER_1
-        listing = generate_listing(TIER_1[0], on_sale=not args.no_sale)
+        listing = generate_listing(TIER_1[0])
         print(f"Title ({len(listing['title'])} chars):")
         print(f"  {listing['title']}")
         print(f"\nTags ({len(listing['tags'])}):")
@@ -403,4 +398,4 @@ if __name__ == "__main__":
         print(f"\nDescription preview (first 200 chars):")
         print(f"  {listing['description'][:200]}...")
     else:
-        export_listings_json(args.output, tier=args.tier, on_sale=not args.no_sale)
+        export_listings_json(args.output, tier=args.tier)

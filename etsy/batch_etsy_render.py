@@ -38,7 +38,7 @@ def poster_filename(city_slug: str, theme: str = DEFAULT_THEME, size: str = SIZE
 
 
 def render_etsy_city(city: CityListing, output_dir: str = RENDERS_DIR,
-                     force: bool = False) -> dict:
+                     force: bool = False, size: str = SIZE) -> dict:
     """Render a single city poster for Etsy.
 
     Returns a status dict with city, status, path/error, and timing.
@@ -46,7 +46,7 @@ def render_etsy_city(city: CityListing, output_dir: str = RENDERS_DIR,
     city_dir = os.path.join(output_dir, city.slug)
     os.makedirs(city_dir, exist_ok=True)
 
-    output_path = os.path.join(city_dir, poster_filename(city.slug))
+    output_path = os.path.join(city_dir, poster_filename(city.slug, size=size))
 
     # Skip if already rendered (unless force=True)
     if os.path.exists(output_path) and not force:
@@ -72,7 +72,7 @@ def render_etsy_city(city: CityListing, output_dir: str = RENDERS_DIR,
         render_poster(
             location=location,
             theme=THEME,
-            size=SIZE,
+            size=size,
             detail_layers=True,
             distance=city.distance,
             text_line_1=display_city,
@@ -106,13 +106,14 @@ def batch_render(
     output_dir: str = RENDERS_DIR,
     workers: int = 1,
     force: bool = False,
+    size: str = SIZE,
 ) -> list[dict]:
     """Render multiple cities, optionally in parallel."""
     print(f"\n{'=' * 60}")
     print(f"GeoLine Etsy Batch Renderer")
     print(f"  Cities: {len(cities)}")
     print(f"  Theme: {THEME}")
-    print(f"  Size: {SIZE} @ {DPI} DPI")
+    print(f"  Size: {size} @ {DPI} DPI")
     print(f"  Output: {output_dir}")
     print(f"  Workers: {workers}")
     print(f"{'=' * 60}\n")
@@ -122,7 +123,7 @@ def batch_render(
     if workers <= 1:
         for i, city in enumerate(cities, 1):
             print(f"[{i}/{len(cities)}] {city.city}, {city.state}...")
-            result = render_etsy_city(city, output_dir, force=force)
+            result = render_etsy_city(city, output_dir, force=force, size=size)
             results.append(result)
             status = result["status"]
             if status == "ok":
@@ -134,7 +135,7 @@ def batch_render(
     else:
         with ProcessPoolExecutor(max_workers=workers) as executor:
             futures = {
-                executor.submit(render_etsy_city, city, output_dir, force): city
+                executor.submit(render_etsy_city, city, output_dir, force, size): city
                 for city in cities
             }
             for i, future in enumerate(as_completed(futures), 1):
@@ -169,6 +170,8 @@ def main():
                         help="Output directory")
     parser.add_argument("--workers", type=int, default=1,
                         help="Parallel workers (default: 1)")
+    parser.add_argument("--size", type=str, default=SIZE,
+                        help="Print size (e.g. 16x20, 24x36, default: 16x20)")
     parser.add_argument("--force", action="store_true",
                         help="Re-render even if output already exists")
     args = parser.parse_args()
@@ -189,7 +192,7 @@ def main():
         sys.exit(1)
 
     batch_render(cities, output_dir=args.output_dir, workers=args.workers,
-                 force=args.force)
+                 force=args.force, size=args.size)
 
 
 if __name__ == "__main__":

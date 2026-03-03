@@ -138,15 +138,31 @@ GeoLine's core differentiators in one sentence: We make maps that look like they
 
 ## **4.2 Pricing Strategy**
 
+Updated March 2026 based on detailed competitive pricing analysis of 37th Parallel Designs across all sizes and product types.
+
+### **Pre-Made City Maps — Full Size Breakdown**
+
+| Size | 37th Parallel Digital | GeoLine Digital | 37th Parallel Unframed | GeoLine Unframed | 37th Parallel Framed | GeoLine Framed |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| 8x10 | $4.32 | $4.99 | $35.83 | $32.00 | $80.31 | $75.00 |
+| 11x14 | $5.56 | $5.99 | $43.25 | $39.00 | $95.14 | $89.00 |
+| 16x20 | $6.80 | $7.99 | $48.19 | $44.00 | $124.79 | $115.00 |
+| 18x24 | $7.41 | $8.99 | $53.13 | $49.00 | $137.15 | $129.00 |
+| 24x36 | $8.03 | $9.99 | $64.25 | $59.00 | $222.40 | $209.00 |
+
+**Pricing rationale:**
+- Digitals priced slightly above competitor to signal quality ($0.67–$1.96 premium per size)
+- Unframed prints priced slightly below to win early traction ($3.83–$5.25 undercut per size)
+- Framed prints priced below to drive high-margin conversions ($5.31–$13.40 undercut per size)
+- Black and white frames priced identically (matches competitor approach)
+- Once 20+ reviews are earned, prices can be adjusted upward
+
+### **Custom Maps & Niche Products**
+
 | Product | 37th Parallel | GeoLine Target | Rationale |
 | :---- | :---- | :---- | :---- |
-| Pre-made city map — digital | $3.01 (on sale) | $8.00–$12.00 | Premium quality justifies 3–4× price; avoid race-to-bottom |
 | Custom map — digital standard | $9.23 | $15.00–$20.00 | GIS quality \+ faster turnaround \= premium positioning |
 | Custom map — rush (24 hr) | $14.76 | $25.00–$30.00 | GIS pipeline enables genuine fast turnaround |
-| Physical print — unframed 11x14 | $43.05 | $45.00–$55.00 | Match \+ slight premium; Gelato quality emphasis |
-| Physical print — framed 11x14 | $86.13 | $85.00–$95.00 | Match market; enable from day 1 via Gelato |
-| Physical print — framed 18x24 | $136.54 | $130.00–$150.00 | Highest-margin physical product |
-| Physical print — framed 24x36 | $154.99–$221.42 | $175.00–$225.00 | Match market ceiling |
 | National Park / Niche map | Not offered | $12.00–$18.00 digital | Greenfield category; no price anchor from competitor |
 
 ## **4.3 Launch City List — 25 Cities in Priority Order**
@@ -211,15 +227,15 @@ Apply consistently across ALL listings from day 1\. This is the visual identity 
 
 Enable ALL of these from launch day. Never add incrementally — buyers who want framed prints will not return.
 
-| Size | Unframed | Framed (Black) | Framed (White) | Framed (Natural Wood) |
+| Size | Digital | Unframed | Framed (Black) | Framed (White) |
 | :---- | :---- | :---- | :---- | :---- |
-| 8×10" | \~$28 | \~$58 | \~$58 | \~$62 |
-| 11×14" | \~$38 | \~$72 | \~$72 | \~$78 |
-| 16×20" | \~$52 | \~$98 | \~$98 | \~$105 |
-| 18×24" | \~$62 | \~$118 | \~$118 | \~$125 |
-| 24×36" | \~$72 | \~$155 | \~$155 | \~$165 |
+| 8×10" | $4.99 | $32.00 | $75.00 | $75.00 |
+| 11×14" | $5.99 | $39.00 | $89.00 | $89.00 |
+| 16×20" | $7.99 | $44.00 | $115.00 | $115.00 |
+| 18×24" | $8.99 | $49.00 | $129.00 | $129.00 |
+| 24×36" | $9.99 | $59.00 | $209.00 | $209.00 |
 
-| Revenue Multiplier: Framed Prints A buyer who upgrades from digital ($10) to a framed 18x24 ($118) represents a 12× revenue increase. 37th Parallel sells framed prints up to $221. Gelato supports this product type. There is no reason to delay enabling framing at launch. |
+| Revenue Multiplier: Framed Prints A buyer who upgrades from digital ($4.99) to a framed 18x24 ($129) represents a 26× revenue increase. 37th Parallel sells framed prints up to $222. Gelato supports this product type. There is no reason to delay enabling framing at launch. |
 | :---- |
 
 ## **5.3 Custom Map Product (Anchor Listing)**
@@ -331,13 +347,13 @@ Apply these to every city map listing. Etsy allows 13 tags max — use all of th
 
 ## **8.3 Pricing During Launch**
 
-* City maps: 20–25% sale applied for first 60 days (matches competitor and drives early reviews)
+* City maps: Launch at competitive prices (slightly above on digital, slightly below on prints) — no sale needed; pricing already undercuts competitor on physical products to drive early traction
 
 * Custom map: NEVER put on sale — matches 37th Parallel's proven strategy; sale signals lower quality on premium product
 
-* Physical prints: No launch sale — Gelato margins require full price; position quality not price
+* Physical prints: No launch sale — priced below competitor to win early reviews while maintaining healthy Gelato margins
 
-* After 60 days: End city map sale, maintain full pricing, rely on reviews and SEO for conversion
+* After 20+ reviews: Evaluate upward price adjustment on prints and framed products based on conversion data
 
 # **9\. Niche Product Opportunities**
 
