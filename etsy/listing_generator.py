@@ -270,9 +270,9 @@ def _generate_variants(city: CityListing) -> list[ListingVariant]:
             sku=f"GLC-{slug}-UNF-{size_key.replace('x', 'X')}",
         ))
 
-    # Framed prints (black and white same price, each size)
-    for size_key, price in FRAMED_PRICES.items():
-        for frame_color in ("black", "white"):
+    # Framed prints — all black sizes first, then all white sizes
+    for frame_color in ("black", "white"):
+        for size_key, price in FRAMED_PRICES.items():
             variants.append(ListingVariant(
                 size=size_key,
                 format=f"framed_{frame_color}",
@@ -343,6 +343,141 @@ def generate_all_listings(
     ]
 
 
+def _format_display(fmt: str) -> str:
+    """Convert internal format name to display name for variations file."""
+    _MAP = {
+        "digital": "Digital Download",
+        "physical_unframed": "Unframed Print",
+        "framed_black": "Framed Black",
+        "framed_white": "Framed White",
+    }
+    return _MAP.get(fmt, fmt)
+
+
+def export_listing_text(city: CityListing, variant_idx: int = 0) -> str:
+    """Generate the _listing.txt cheat sheet for a city.
+
+    Returns the output file path.
+    """
+    listing = generate_listing(city, variant_idx)
+    renders_dir = Path(__file__).parent / "renders" / city.slug
+    renders_dir.mkdir(parents=True, exist_ok=True)
+    out_path = renders_dir / f"{city.slug}_listing.txt"
+
+    # Collect mockup and image files
+    mockups = sorted(renders_dir.glob("mockup_*.jpg"))
+    detail_crop = renders_dir / f"{city.slug}_detail_crop.jpg"
+    size_comp = renders_dir / f"{city.slug}_size_comparison.png"
+
+    if city.country == "USA":
+        location_label = f"{city.city}, {city.state}"
+    else:
+        location_label = f"{city.city}, {city.country}"
+
+    lines: list[str] = []
+    lines.append("=" * 70)
+    lines.append(f"ETSY LISTING — {location_label}")
+    lines.append("=" * 70)
+    lines.append("")
+
+    # Title
+    lines.append("TITLE")
+    lines.append("-" * 40)
+    lines.append(listing["title"])
+    lines.append("")
+
+    # Tags
+    lines.append(f"TAGS (paste one per tag field)")
+    lines.append("-" * 40)
+    for i, tag in enumerate(listing["tags"], 1):
+        lines.append(f"  {i:2d}. {tag}")
+    lines.append("")
+
+    # Description
+    lines.append("DESCRIPTION")
+    lines.append("-" * 40)
+    lines.append(listing["description"])
+    lines.append("")
+
+    # Pricing table
+    lines.append("PRICING & VARIANTS")
+    lines.append("-" * 40)
+    lines.append(f"{'Size':<9}{'Format':<24}{'Price':>7}   {'SKU'}")
+    lines.append(f"{'----':<9}{'------':<24}{'-----':>7}   {'---'}")
+    for v in listing["variants"]:
+        lines.append(
+            f"{v['size']:<9}{v['format']:<24}${v['price']:>7.2f}   {v['sku']}"
+        )
+    lines.append("")
+
+    # Photos
+    lines.append("PHOTOS (upload in this order)")
+    lines.append("-" * 40)
+    rank = 1
+    for m in mockups:
+        lines.append(f"  {rank}. {m.name}")
+        rank += 1
+    if detail_crop.exists():
+        lines.append(f"  {rank}. {detail_crop.name}")
+        rank += 1
+    if size_comp.exists():
+        lines.append(f"  {rank}. {size_comp.name}")
+        rank += 1
+    lines.append("")
+
+    # Digital file
+    lines.append("DIGITAL FILE")
+    lines.append("-" * 40)
+    lines.append(f"  {city.slug}_16x20.png")
+
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return str(out_path)
+
+
+def export_variations_text(city: CityListing, variant_idx: int = 0) -> str:
+    """Generate the _variations.txt file for a city.
+
+    Returns the output file path.
+    """
+    listing = generate_listing(city, variant_idx)
+    renders_dir = Path(__file__).parent / "renders" / city.slug
+    renders_dir.mkdir(parents=True, exist_ok=True)
+    out_path = renders_dir / f"{city.slug}_variations.txt"
+
+    if city.country == "USA":
+        location_label = f"{city.city}, {city.state}"
+    else:
+        location_label = f"{city.city}, {city.country}"
+
+    lines: list[str] = []
+    lines.append(f"ETSY VARIATIONS — {location_label}")
+    lines.append("Copy each row into the Etsy variation grid.")
+    lines.append("")
+    lines.append(f"{'Row':<6}{'Format':<21}{'Size':<12}{'Price':>7}   {'SKU'}")
+    lines.append(f"{'---':<6}{'------':<21}{'----':<12}{'-----':>7}   {'---'}")
+
+    for i, v in enumerate(listing["variants"], 1):
+        display = _format_display(v["format"])
+        lines.append(
+            f"{i:<6}{display:<21}{v['size']:<12}{v['price']:>7.2f}   {v['sku']}"
+        )
+
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+    return str(out_path)
+
+
+def export_all_texts(tier: int | None = None) -> None:
+    """Generate _listing.txt and _variations.txt for all cities."""
+    from etsy.city_list import ALL_CITIES, get_cities_by_tier
+
+    cities = get_cities_by_tier(tier) if tier else ALL_CITIES
+    for i, city in enumerate(cities):
+        export_listing_text(city, variant_idx=i)
+        export_variations_text(city, variant_idx=i)
+        print(f"  {city.city}: listing + variations")
+    print(f"\nGenerated text files for {len(cities)} cities")
+
+
 def export_listings_json(
     output_path: str = "etsy/listings.json",
     tier: int | None = None,
@@ -371,9 +506,14 @@ if __name__ == "__main__":
     parser.add_argument("--city", type=str, default=None, help="Generate for a single city")
     parser.add_argument("--output", "-o", default="etsy/listings.json", help="Output JSON path")
     parser.add_argument("--preview", action="store_true", help="Print one listing to stdout")
+    parser.add_argument("--generate-texts", action="store_true", help="Generate _listing.txt and _variations.txt for all cities")
     args = parser.parse_args()
 
-    if args.city:
+    if args.generate_texts:
+        import sys
+        sys.stdout.reconfigure(encoding="utf-8")
+        export_all_texts(tier=args.tier)
+    elif args.city:
         from etsy.city_list import get_city
         city = get_city(args.city)
         if not city:
