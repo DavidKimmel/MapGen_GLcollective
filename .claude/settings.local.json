@@ -1,35 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)",
-      "Bash(python:*)",
-      "Bash(pip:*)",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(find:*)",
-      "Bash(wc:*)",
-      "Bash(grep:*)",
-      "Bash(cd:*)",
-      "Bash(curl:*)",
-      "Bash(mkdir:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
-      "Bash(C:/Python313/python.exe:*)",
+      "Bash(*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
       "WebSearch",
-      "WebFetch(domain:www.etsy.com)",
-      "WebFetch(domain:developer.etsy.com)",
-      "WebFetch(domain:community.etsy.com)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:support.gelato.com)",
-      "WebFetch(domain:dynamicmockups.com)",
-      "WebFetch(domain:docs.dynamicmockups.com)",
-      "WebFetch(domain:docs.leonardo.ai)",
-      "WebFetch(domain:api.dropboxapi.com)",
-      "WebFetch(domain:www.dropbox.com)",
-      "WebFetch(domain:dashboard.gelato.com)"
+      "WebFetch(*)",
+      "Agent"
     ]
   }
 }
