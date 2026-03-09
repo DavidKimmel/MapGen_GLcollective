@@ -7,34 +7,41 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-const SWATCH_KEYS: (keyof Theme)[] = [
-  "bg", "text", "water", "parks", "road_motorway", "road_primary",
+const PRIORITY_ORDER = [
+  "37th_parallel",
+  "clay_sage",
+  "vintage",
+  "terracotta",
 ];
 
+function sortThemes(themes: Theme[]): Theme[] {
+  const priorityIndex = new Map(PRIORITY_ORDER.map((id, i) => [id, i]));
+  return [...themes].sort((a, b) => {
+    const ai = priorityIndex.get(a.id) ?? PRIORITY_ORDER.length;
+    const bi = priorityIndex.get(b.id) ?? PRIORITY_ORDER.length;
+    if (ai !== bi) return ai - bi;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export default function ThemeSelector({ themes, selected, onSelect }: Props) {
+  const sorted = sortThemes(themes);
+
   return (
     <div className="theme-selector">
-      <label>Theme</label>
-      <div className="theme-grid">
-        {themes.map((t) => (
-          <div
-            key={t.id}
-            className={`theme-card ${t.id === selected ? "selected" : ""}`}
-            onClick={() => onSelect(t.id)}
-          >
-            <div className="theme-swatches">
-              {SWATCH_KEYS.map((k) => (
-                <span
-                  key={k}
-                  className="swatch"
-                  style={{ background: t[k] as string }}
-                />
-              ))}
-            </div>
-            <span className="theme-name">{t.name}</span>
-          </div>
+      <label htmlFor="theme-select">Theme</label>
+      <select
+        id="theme-select"
+        className="theme-dropdown"
+        value={selected}
+        onChange={(e) => onSelect(e.target.value)}
+      >
+        {sorted.map((t) => (
+          <option key={t.id} value={t.id}>
+            {t.name}
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 }
