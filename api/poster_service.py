@@ -28,6 +28,7 @@ def submit_job(
     text_line_3: str | None = None,
     dpi: int = 300,
     border: bool = False,
+    map_only: bool = False,
 ) -> str:
     """Submit a poster generation job and return a job_id."""
     job_id = str(uuid.uuid4())
@@ -52,6 +53,7 @@ def submit_job(
                 text_line_3=text_line_3,
                 dpi=dpi,
                 border=border,
+                map_only=map_only,
             )
             jobs[job_id]["status"] = "complete"
             jobs[job_id]["output_file"] = output_file

@@ -57,10 +57,19 @@ def main():
                         help="Output file path (auto-generated if not set)")
     parser.add_argument("--border", action="store_true",
                         help="Add double-line border")
+    parser.add_argument("--map-only", action="store_true",
+                        help="Render map only (no text, no margins) for PSD templates")
 
     args = parser.parse_args()
 
     detail_layers = not args.no_detail_layers
+
+    # Geocode pin address if provided
+    pin_lat = None
+    pin_lon = None
+    if args.pin_address:
+        from utils.geocoding import parse_location
+        pin_lat, pin_lon, _ = parse_location(args.pin_address)
 
     try:
         output = render_poster(
@@ -70,7 +79,8 @@ def main():
             crop=args.crop,
             detail_layers=detail_layers,
             distance=args.distance,
-            pin_address=args.pin_address,
+            pin_lat=pin_lat,
+            pin_lon=pin_lon,
             pin_style=args.pin_style,
             pin_color=args.pin_color,
             font_preset=args.font_preset,
@@ -80,6 +90,7 @@ def main():
             dpi=args.dpi,
             output_path=args.output,
             border=args.border,
+            map_only=args.map_only,
         )
         print(f"\nPoster saved: {output}")
     except Exception as e:

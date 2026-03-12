@@ -30,13 +30,13 @@ WIDE_SPACE = " "
 FONT_PRESETS = {
     1: {
         "name": "sans",
-        "description": "Montserrat — sans-serif, all caps, letterspaced",
-        "city":     ("Montserrat-Variable.ttf", "sans-serif", "light", "normal"),
-        "subtitle": ("Montserrat-Variable.ttf", "sans-serif", "light", "normal"),
-        "label":    ("Montserrat-Variable.ttf", "sans-serif", "light", "normal"),
-        "body":     ("Montserrat-Variable.ttf", "sans-serif", "light", "normal"),
-        "body_italic": ("Montserrat-Variable.ttf", "sans-serif", "light", "italic"),
-        "coords":   ("Montserrat-Variable.ttf", "sans-serif", "light", "normal"),
+        "description": "Century Gothic — clean geometric sans, all caps",
+        "city":     ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "normal"),
+        "subtitle": ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "normal"),
+        "label":    ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "normal"),
+        "body":     ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "normal"),
+        "body_italic": ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "italic"),
+        "coords":   ("CenturyGothic-Bold.ttf", "sans-serif", "bold", "normal"),
         "city_uppercase": True,
         "city_letterspaced": True,
         "line2_uppercase": True,
@@ -45,14 +45,14 @@ FONT_PRESETS = {
         "line3_letterspaced": True,
     },
     2: {
-        "name": "serif",
-        "description": "Lora — traditional serif, title case, elegant",
-        "city":     ("Lora-Variable.ttf", "serif", "normal", "normal"),
-        "subtitle": ("Lora-Variable.ttf", "serif", "light", "normal"),
-        "label":    ("Lora-Variable.ttf", "serif", "light", "normal"),
-        "body":     ("Lora-Variable.ttf", "serif", "light", "normal"),
-        "body_italic": ("Lora-Italic-Variable.ttf", "serif", "normal", "italic"),
-        "coords":   ("Lora-Variable.ttf", "serif", "light", "normal"),
+        "name": "titling",
+        "description": "Perpetua Titling MT — elegant small caps serif",
+        "city":     ("PerpetuaTitlingMT-Bold.ttf", "serif", "bold", "normal"),
+        "subtitle": ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
+        "label":    ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
+        "body":     ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
+        "body_italic": ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "italic"),
+        "coords":   ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
         "city_uppercase": False,
         "city_letterspaced": False,
         "line2_uppercase": False,
@@ -60,27 +60,28 @@ FONT_PRESETS = {
     },
     3: {
         "name": "script",
-        "description": "Great Vibes — delicate calligraphy script",
-        "city":     ("GreatVibes-Regular.ttf", "cursive", "normal", "normal"),
-        "subtitle": ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "label":    ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "body":     ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "body_italic": ("CormorantGaramond-Italic.ttf", "serif", "normal", "italic"),
-        "coords":   ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
+        "description": "Priestacy title + Lucida Calligraphy body",
+        "city":     ("Priestacy.otf", "cursive", "normal", "normal"),
+        "subtitle": ("LucidaCalligraphy-Italic.ttf", "cursive", "normal", "normal"),
+        "label":    ("LucidaCalligraphy-Italic.ttf", "cursive", "normal", "normal"),
+        "body":     ("LucidaCalligraphy-Italic.ttf", "cursive", "normal", "normal"),
+        "body_italic": ("LucidaCalligraphy-Italic.ttf", "cursive", "normal", "italic"),
+        "coords":   ("LucidaCalligraphy-Italic.ttf", "cursive", "normal", "normal"),
         "city_uppercase": False,
         "city_letterspaced": False,
         "line2_uppercase": False,
         "line2_letterspaced": False,
+        "title_descender_offset": 0.012,
     },
     4: {
-        "name": "cursive",
-        "description": "Pinyon Script — bold flowing calligraphy",
-        "city":     ("cache/pinyon_script_regular.ttf", "cursive", "normal", "normal"),
-        "subtitle": ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "label":    ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "body":     ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "body_italic": ("CormorantGaramond-Italic.ttf", "serif", "normal", "italic"),
-        "coords":   ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
+        "name": "corsiva",
+        "description": "Monotype Corsiva — classic italic script",
+        "city":     ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "normal"),
+        "subtitle": ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "normal"),
+        "label":    ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "normal"),
+        "body":     ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "normal"),
+        "body_italic": ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "italic"),
+        "coords":   ("MonotypeCorsiva-Regular.ttf", "cursive", "normal", "normal"),
         "city_uppercase": False,
         "city_letterspaced": False,
         "line2_uppercase": False,
@@ -88,13 +89,13 @@ FONT_PRESETS = {
     },
     5: {
         "name": "classic",
-        "description": "Cormorant Garamond — elegant classic serif",
-        "city":     ("CormorantGaramond-Bold.ttf", "serif", "bold", "normal"),
-        "subtitle": ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
-        "label":    ("CormorantGaramond-Regular.ttf", "serif", "normal", "normal"),
-        "body":     ("CormorantGaramond-Regular.ttf", "serif", "normal", "normal"),
-        "body_italic": ("CormorantGaramond-Italic.ttf", "serif", "normal", "italic"),
-        "coords":   ("CormorantGaramond-Light.ttf", "serif", "light", "normal"),
+        "description": "Footlight MT Light — warm classic serif",
+        "city":     ("FootlightMTLight-Regular.ttf", "serif", "normal", "normal"),
+        "subtitle": ("FootlightMTLight-Regular.ttf", "serif", "normal", "normal"),
+        "label":    ("FootlightMTLight-Regular.ttf", "serif", "normal", "normal"),
+        "body":     ("FootlightMTLight-Regular.ttf", "serif", "normal", "normal"),
+        "body_italic": ("FootlightMTLight-Regular.ttf", "serif", "normal", "italic"),
+        "coords":   ("FootlightMTLight-Regular.ttf", "serif", "normal", "normal"),
         "city_uppercase": False,
         "city_letterspaced": False,
         "line2_uppercase": False,
@@ -105,22 +106,24 @@ FONT_PRESETS = {
 
 def get_zone_positions(has_top_label: bool = False) -> dict:
     """Return axes position and text line y-positions for the 2-zone layout."""
-    left = 0.07
-    width = 0.86
+    left = 0.049
+    width = 0.902
 
     if has_top_label:
-        map_bottom = 0.17
-        map_height = 0.58
-        top_zone_y = 0.92
+        map_bottom = 0.196
+        map_height = 0.574
+        top_zone_y = 0.951
     else:
-        map_bottom = 0.17
-        map_height = 0.76
+        map_bottom = 0.196
+        map_height = 0.755
         top_zone_y = None
 
+    # Text zone: 0 to 0.196
+    # Bottom padding ~0.048 for framing, lines spaced evenly above
     bottom_zone = {
-        "line_1_y": 0.120,
-        "line_2_y": 0.072,
-        "line_3_y": 0.042,
+        "line_1_y": 0.138,
+        "line_2_y": 0.088,
+        "line_3_y": 0.058,
     }
 
     return {
@@ -197,10 +200,11 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
     line2 = text_line_2 if text_line_2 is not None else custom_line_1
     line3 = text_line_3 if text_line_3 is not None else custom_line_2
 
+    # Fonts with large descenders need extra space below the title
+    descender_offset = preset.get("title_descender_offset", 0)
+
     # --- Line 1 (large title) ---
     line1_size = 63 * scale_factor
-    if preset["name"] == "script":
-        line1_size = 72 * scale_factor
 
     if line1:
         char_count = len(line1)
@@ -209,10 +213,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
 
         if preset["city_uppercase"]:
             display_line1 = line1.upper()
-        elif preset["name"] in ("serif", "script", "cursive", "classic"):
-            display_line1 = line1.title()
         else:
-            display_line1 = line1
+            display_line1 = line1.title()
 
         if preset["city_letterspaced"] and is_latin_script(line1):
             display_line1 = WIDE_SPACE.join(list(display_line1))
@@ -227,7 +229,7 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         )
 
     # --- Line 2 (medium subtitle) ---
-    line2_size = 20 * scale_factor
+    line2_size = 17 * scale_factor
     if line2:
         display_line2 = line2
         if preset.get("line2_uppercase"):
@@ -235,15 +237,9 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         if preset.get("line2_letterspaced") and is_latin_script(line2):
             display_line2 = WIDE_SPACE.join(list(display_line2))
 
-        # Script/cursive titles have larger descenders — nudge line 2 down
-        # to visually balance spacing between all three lines
-        line2_y = bottom["line_2_y"]
-        if preset["name"] in ("script", "cursive"):
-            line2_y = 0.062
-
         font_line2 = _get_font(preset, "body", line2_size)
         fig.text(
-            0.5, line2_y,
+            0.5, bottom["line_2_y"] - descender_offset,
             display_line2,
             color=text_secondary,
             ha="center", va="center",
@@ -251,7 +247,7 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         )
 
     # --- Line 3 (small detail) ---
-    line3_size = 18 * scale_factor
+    line3_size = 17 * scale_factor
     if line3:
         display_line3 = line3
         if preset.get("line3_uppercase"):
@@ -261,7 +257,7 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
 
         font_line3 = _get_font(preset, "body", line3_size)
         fig.text(
-            0.5, bottom["line_3_y"],
+            0.5, bottom["line_3_y"] - descender_offset,
             display_line3,
             color=text_secondary,
             ha="center", va="center",

@@ -129,6 +129,7 @@ def render_poster(
     dpi: int = 300,
     output_path: str | None = None,
     border: bool = False,
+    map_only: bool = False,
 ) -> str:
     """Generate a complete map poster.
 
@@ -189,7 +190,7 @@ def render_poster(
     # Determine if any text lines are provided
     has_text = any([text_line_1, text_line_2, text_line_3])
     # Default text: use city name and state if no custom text
-    if not has_text:
+    if not has_text and not map_only:
         text_line_1 = city_name
         if state_name:
             text_line_2 = state_name
@@ -197,7 +198,11 @@ def render_poster(
     zones = get_zone_positions(has_top_label=False)
 
     fig = plt.figure(figsize=(width_in, height_in), facecolor="#FFFFFF")
-    ax = fig.add_axes(zones["map"])
+    if map_only:
+        # Map fills entire canvas — no margins, no text zone
+        ax = fig.add_axes([0, 0, 1, 1])
+    else:
+        ax = fig.add_axes(zones["map"])
     ax.set_facecolor(theme_data["bg"])
 
     # 3. Fetch OSM data
@@ -328,16 +333,19 @@ def render_poster(
         except Exception as e:
             safe_print(f"  [!] Pin rendering failed: {e}")
 
-    # 8. Render text zones
-    safe_print("\nRendering text...")
-    scale_factor = min(height_in, width_in) / 12.0
+    # 8. Render text zones (skip in map_only mode)
+    if not map_only:
+        safe_print("\nRendering text...")
+        scale_factor = min(height_in, width_in) / 12.0
 
-    render_bottom_text(
-        fig, city_name, state_name, True, point,
-        None, None, theme,
-        scale_factor=scale_factor, font_preset=font_preset,
-        text_line_1=text_line_1, text_line_2=text_line_2, text_line_3=text_line_3,
-    )
+        render_bottom_text(
+            fig, city_name, state_name, True, point,
+            None, None, theme,
+            scale_factor=scale_factor, font_preset=font_preset,
+            text_line_1=text_line_1, text_line_2=text_line_2, text_line_3=text_line_3,
+        )
+    else:
+        safe_print("\nMap-only mode — skipping text")
 
     # Optional border
     if border:
@@ -356,7 +364,10 @@ def render_poster(
         ax.add_patch(rect_inner)
 
     # Re-apply axes position
-    ax.set_position(zones["map"])
+    if map_only:
+        ax.set_position([0, 0, 1, 1])
+    else:
+        ax.set_position(zones["map"])
 
     # 9. Save as RGB PNG at target DPI
     if output_path is None:

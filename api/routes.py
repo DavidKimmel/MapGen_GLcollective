@@ -57,6 +57,7 @@ def generate():
         text_line_3=body.get("text_line_3"),
         dpi=int(body.get("dpi", 300)),
         border=bool(body.get("border", False)),
+        map_only=bool(body.get("map_only", False)),
     )
     return jsonify({"job_id": job_id})
 

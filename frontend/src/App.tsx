@@ -52,6 +52,7 @@ export default function App() {
     text_line_1: "",
     text_line_2: "",
     text_line_3: "",
+    map_only: false,
   });
 
   useEffect(() => {
@@ -204,12 +205,15 @@ export default function App() {
           textLine2={settings.text_line_2}
           textLine3={settings.text_line_3}
           fontPreset={settings.font_preset}
+          mapOnly={settings.map_only}
           onTextLine1Change={(v) => set("text_line_1", v)}
           onTextLine2Change={(v) => set("text_line_2", v)}
           onTextLine3Change={(v) => set("text_line_3", v)}
           onFontPresetChange={(v) => set("font_preset", v)}
+          onMapOnlyChange={(v) => set("map_only", v)}
           showLine3={isCustom}
           showFontPreset={isCustom}
+          showMapOnly={isCustom}
         />
 
         <hr className="section-divider" />

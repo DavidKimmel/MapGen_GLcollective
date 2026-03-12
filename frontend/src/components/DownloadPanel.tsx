@@ -68,6 +68,7 @@ export default function DownloadPanel({
         text_line_2: settings.text_line_2 || displaySubtitle || undefined,
         text_line_3: settings.text_line_3 || undefined,
         border: settings.border,
+        map_only: settings.map_only,
       });
       setJobId(id);
 

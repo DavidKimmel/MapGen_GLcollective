@@ -64,4 +64,5 @@ export interface PosterSettings {
   text_line_1: string;
   text_line_2: string;
   text_line_3: string;
+  map_only: boolean;
 }
