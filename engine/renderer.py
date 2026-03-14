@@ -41,7 +41,7 @@ from engine.map_engine import (
 from engine.ocean import build_ocean_polygons, refine_ocean_with_harbors
 from engine.pin_renderer import render_pin
 from engine.roads import render_roads
-from engine.text_layout import get_zone_positions, render_bottom_text, render_top_label
+from engine.text_layout import get_zone_positions, render_bottom_text, render_date_night_text, render_top_label
 from export.output_sizes import get_size_config
 from utils.geocoding import extract_city_state, parse_location
 from utils.logging import safe_print
@@ -130,6 +130,8 @@ def render_poster(
     output_path: str | None = None,
     border: bool = False,
     map_only: bool = False,
+    layout: str = "default",
+    text_line_4: str | None = None,
 ) -> str:
     """Generate a complete map poster.
 
@@ -195,7 +197,7 @@ def render_poster(
         if state_name:
             text_line_2 = state_name
 
-    zones = get_zone_positions(has_top_label=False)
+    zones = get_zone_positions(has_top_label=False, layout=layout)
 
     fig = plt.figure(figsize=(width_in, height_in), facecolor="#FFFFFF")
     if map_only:
@@ -319,7 +321,8 @@ def render_poster(
         apply_circle_crop(ax, fig, bg_color="#FFFFFF")
     elif crop == "heart":
         safe_print("\nApplying heart crop...")
-        apply_heart_crop(ax, fig, bg_color="#FFFFFF")
+        h_scale = 0.98 if layout == "date_night" else 1.0
+        apply_heart_crop(ax, fig, bg_color="#FFFFFF", heart_scale=h_scale)
     elif crop == "house":
         safe_print("\nApplying house crop...")
         apply_house_crop(ax, fig, bg_color="#FFFFFF")
@@ -338,12 +341,19 @@ def render_poster(
         safe_print("\nRendering text...")
         scale_factor = min(height_in, width_in) / 12.0
 
-        render_bottom_text(
-            fig, city_name, state_name, True, point,
-            None, None, theme,
-            scale_factor=scale_factor, font_preset=font_preset,
-            text_line_1=text_line_1, text_line_2=text_line_2, text_line_3=text_line_3,
-        )
+        if layout == "date_night":
+            render_date_night_text(
+                fig, scale_factor=scale_factor, font_preset=font_preset,
+                text_line_1=text_line_1, text_line_2=text_line_2,
+                text_line_3=text_line_3, text_line_4=text_line_4,
+            )
+        else:
+            render_bottom_text(
+                fig, city_name, state_name, True, point,
+                None, None, theme,
+                scale_factor=scale_factor, font_preset=font_preset,
+                text_line_1=text_line_1, text_line_2=text_line_2, text_line_3=text_line_3,
+            )
     else:
         safe_print("\nMap-only mode — skipping text")
 
@@ -368,6 +378,8 @@ def render_poster(
         ax.set_position([0, 0, 1, 1])
     else:
         ax.set_position(zones["map"])
+
+    safe_print(f"  Layout: {layout}")
 
     # 9. Save as RGB PNG at target DPI
     if output_path is None:

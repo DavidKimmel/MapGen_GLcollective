@@ -51,6 +51,11 @@ def main():
                         help="Medium subtitle text (e.g., 'Chicago, Illinois')")
     parser.add_argument("--text-line-3", default=None,
                         help="Small detail text (e.g., 'Est. June 2019')")
+    parser.add_argument("--text-line-4", default=None,
+                        help="4th text line (date_night layout: date)")
+    parser.add_argument("--layout", default="default",
+                        choices=["default", "date_night"],
+                        help="Layout mode (default: default)")
     parser.add_argument("--dpi", type=int, default=300,
                         help="Resolution in DPI (default: 300)")
     parser.add_argument("--output", "-o", default=None,
@@ -87,6 +92,8 @@ def main():
             text_line_1=args.text_line_1,
             text_line_2=args.text_line_2,
             text_line_3=args.text_line_3,
+            text_line_4=args.text_line_4,
+            layout=args.layout,
             dpi=args.dpi,
             output_path=args.output,
             border=args.border,

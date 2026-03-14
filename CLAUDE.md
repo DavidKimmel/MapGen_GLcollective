@@ -10,18 +10,18 @@ Launch all 25 pre-made city map listings on Etsy with Gelato print-on-demand ful
 
 - **6 cities live on Etsy:** Washington DC, Seattle, Savannah, San Francisco, Salt Lake City, Richmond — all Gelato-connected
 - **19 cities remaining** — renders, Dropbox links, listing text files, and Gelato CSVs are all ready
-- **Per-city workflow is proven:** copy listing in Etsy, update from cheat sheets, run `gelato_connect`
-- **Gelato create-from-template API researched** — won't work for us (templates only support one product type, our listings need 3)
-- **All 25 cities now have detail crop images** with "EVERY STREET. EVERY DETAIL." badge
-- **Next up:** Continue batch-creating Etsy listings for remaining cities (Denver, Portland, Austin, Nashville, etc.)
+- **Custom map listing live** — 10 SKUs (5 digital + 5 unframed), `custom_fulfill.py` pipeline built
+- **Date Night heart map listing** — `date_night` layout built, 24 sample renders complete, SKUs generated (GLC-DATE-*)
+  - Layout: names above heart (Priestacy script), tagline below (Garamond Bold), location + date (High Tower Text)
+  - Samples in `etsy/renders/DateMap/` — 8 cities x 3 sizes (11x14, 16x20, 24x36)
 - **Waiting on:** Etsy API approval to fully automate listing creation
 
 ## What's Next
 
-1. **Batch list remaining 19 cities** — copy existing listing, swap content from `_listing.txt` / `_variations.txt`, connect Gelato via API
-2. **Upload listing photos** — mockups + detail crop + size comparison per city
-3. **Place test order** — verify end-to-end Gelato fulfillment flow
-4. **Custom map listings** — research competitor approaches, build personalization workflow
+1. **Publish Date Night listing on Etsy** — copy custom map listing, update photos/text/SKUs
+2. **Batch list remaining 19 cities** — copy existing listing, swap content, connect Gelato
+3. **Upload listing photos** — mockups + detail crop + size comparison per city
+4. **Place test order** — verify end-to-end Gelato fulfillment flow
 5. **Etsy API approval** — automate listing creation when approved
 
 ## Architecture Decisions
@@ -82,6 +82,12 @@ python -m etsy.gelato_connect --city "City Name" --dry-run
 
 # Generate Gelato CSV (alternative to API, needs Dropbox token)
 python -m etsy.generate_gelato_csvs --city city_name
+
+# Render a date night heart map
+python cli.py --location "Portland, Oregon" --layout date_night --crop heart \
+  --font-preset 3 --pin-style 2 --pin-color "#CC3333" \
+  --text-line-1 "Names" --text-line-2 "Tagline" \
+  --text-line-3 "City, State" --text-line-4 "Date"
 ```
 
 ## Rendering
@@ -91,6 +97,8 @@ python -m etsy.generate_gelato_csvs --city city_name
 - Primary theme: `37th_parallel` (black roads on white background)
 - fig_scale ensures consistent linewidths across all sizes (reference: 16x20)
 - File naming: `{city_slug}_{size}.png` (default theme), `{city_slug}_{theme}_{size}.png` (other themes)
+- **Layouts:** `default` (standard poster) or `date_night` (names above heart, 3 lines below)
+- **Date night layout:** line 1 = Priestacy script (above), line 2 = Garamond Bold, lines 3-4 = High Tower Text (below)
 
 ## Etsy & Fulfillment
 

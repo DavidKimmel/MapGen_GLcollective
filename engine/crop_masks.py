@@ -299,8 +299,12 @@ def _heart_svg_verts(cx, cy, sx, sy):
     return verts, codes
 
 
-def apply_heart_crop(ax, fig, bg_color="#FFFFFF"):
-    """Apply a heart-shaped crop mask to the map area."""
+def apply_heart_crop(ax, fig, bg_color="#FFFFFF", heart_scale=1.0):
+    """Apply a heart-shaped crop mask to the map area.
+
+    Args:
+        heart_scale: Multiplier for heart size (1.0 = default, 1.15 = date_night).
+    """
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
     cx = (xlim[0] + xlim[1]) / 2
@@ -308,8 +312,8 @@ def apply_heart_crop(ax, fig, bg_color="#FFFFFF"):
     x_range = xlim[1] - xlim[0]
     y_range = ylim[1] - ylim[0]
 
-    sx = x_range * 0.50
-    sy = y_range * 0.54
+    sx = x_range * 0.50 * heart_scale
+    sy = y_range * 0.54 * heart_scale
     center_y = cy + y_range * 0.02
 
     heart_verts, heart_codes = _heart_svg_verts(cx, center_y, sx, sy)

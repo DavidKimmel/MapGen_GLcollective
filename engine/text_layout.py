@@ -45,14 +45,14 @@ FONT_PRESETS = {
         "line3_letterspaced": True,
     },
     2: {
-        "name": "titling",
-        "description": "Perpetua Titling MT — elegant small caps serif",
-        "city":     ("PerpetuaTitlingMT-Bold.ttf", "serif", "bold", "normal"),
-        "subtitle": ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
-        "label":    ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
-        "body":     ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
-        "body_italic": ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "italic"),
-        "coords":   ("PerpetuaTitlingMT-Light.ttf", "serif", "light", "normal"),
+        "name": "hightower",
+        "description": "High Tower Text — refined traditional serif",
+        "city":     ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "subtitle": ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "label":    ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "body":     ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "body_italic": ("HighTowerText-Italic.ttf", "serif", "normal", "italic"),
+        "coords":   ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
         "city_uppercase": False,
         "city_letterspaced": False,
         "line2_uppercase": False,
@@ -104,10 +104,36 @@ FONT_PRESETS = {
 }
 
 
-def get_zone_positions(has_top_label: bool = False) -> dict:
-    """Return axes position and text line y-positions for the 2-zone layout."""
+def get_zone_positions(has_top_label: bool = False,
+                       layout: str = "default") -> dict:
+    """Return axes position and text line y-positions for the 2-zone layout.
+
+    Layouts:
+        "default"    — standard poster: map on top, 3 text lines below
+        "date_night" — heart centered: line 1 above, lines 2-4 below
+    """
     left = 0.049
     width = 0.902
+
+    if layout == "date_night":
+        # Heart centered with text above and below
+        map_bottom = 0.20
+        map_height = 0.60
+        top_zone_y = None  # handled by render_date_night_text
+
+        bottom_zone = {
+            "line_1_y": 0.88,   # names — above heart
+            "line_2_y": 0.115,  # tagline — below heart
+            "line_3_y": 0.082,  # location
+            "line_4_y": 0.056,  # date
+        }
+
+        return {
+            "map": (left, map_bottom, width, map_height),
+            "top_zone_y": top_zone_y,
+            "bottom_zone": bottom_zone,
+            "layout": "date_night",
+        }
 
     if has_top_label:
         map_bottom = 0.196
@@ -130,6 +156,7 @@ def get_zone_positions(has_top_label: bool = False) -> dict:
         "map": (left, map_bottom, width, map_height),
         "top_zone_y": top_zone_y,
         "bottom_zone": bottom_zone,
+        "layout": "default",
     }
 
 
@@ -229,7 +256,7 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         )
 
     # --- Line 2 (medium subtitle) ---
-    line2_size = 17 * scale_factor
+    line2_size = 20 * scale_factor
     if line2:
         display_line2 = line2
         if preset.get("line2_uppercase"):
@@ -247,7 +274,7 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         )
 
     # --- Line 3 (small detail) ---
-    line3_size = 17 * scale_factor
+    line3_size = 20 * scale_factor
     if line3:
         display_line3 = line3
         if preset.get("line3_uppercase"):
@@ -262,6 +289,76 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
             color=text_secondary,
             ha="center", va="center",
             fontproperties=font_line3,
+        )
+
+
+def render_date_night_text(fig, scale_factor: float = 1.0,
+                           font_preset: int = 3,
+                           text_line_1: str | None = None,
+                           text_line_2: str | None = None,
+                           text_line_3: str | None = None,
+                           text_line_4: str | None = None) -> None:
+    """Render text for date_night layout: line 1 above heart, lines 2-4 below.
+
+    Line 1: Names (large script, above heart) — uses font_preset (e.g., 3=Priestacy)
+    Line 2: Tagline (bold serif, below heart) — always font 2 (High Tower Text)
+    Line 3: Location (normal serif) — always font 2
+    Line 4: Date (normal serif) — always font 2
+    """
+    title_preset = get_font_preset(font_preset)
+    body_preset = get_font_preset(2)  # High Tower Text for bottom lines
+    zones = get_zone_positions(layout="date_night")
+    bz = zones["bottom_zone"]
+
+    text_color = "#1A1A1A"
+
+    # --- Line 1: Names above heart (large script) ---
+    if text_line_1:
+        line1_size = 58 * scale_factor
+        font_line1 = _get_font(title_preset, "city", line1_size)
+        fig.text(
+            0.5, bz["line_1_y"],
+            text_line_1,
+            color=text_color,
+            ha="center", va="center",
+            fontproperties=font_line1,
+        )
+
+    # --- Line 2: Tagline below heart (Garamond Bold, larger) ---
+    if text_line_2:
+        line2_size = 28 * scale_factor
+        garamond_bold = os.path.join(FONTS_DIR, "Garamond-Bold.ttf")
+        font_line2 = FontProperties(fname=garamond_bold, size=line2_size)
+        fig.text(
+            0.5, bz["line_2_y"],
+            text_line_2,
+            color=text_color,
+            ha="center", va="center",
+            fontproperties=font_line2,
+        )
+
+    # --- Line 3: Location (normal serif) ---
+    if text_line_3:
+        line3_size = 18 * scale_factor
+        font_line3 = _get_font(body_preset, "body", line3_size)
+        fig.text(
+            0.5, bz["line_3_y"],
+            text_line_3,
+            color=text_color,
+            ha="center", va="center",
+            fontproperties=font_line3,
+        )
+
+    # --- Line 4: Date (normal serif) ---
+    if text_line_4:
+        line4_size = 18 * scale_factor
+        font_line4 = _get_font(body_preset, "body", line4_size)
+        fig.text(
+            0.5, bz["line_4_y"],
+            text_line_4,
+            color=text_color,
+            ha="center", va="center",
+            fontproperties=font_line4,
         )
 
 
