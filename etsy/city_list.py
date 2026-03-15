@@ -174,11 +174,71 @@ TIER_3: list[CityListing] = [
     ),
 ]
 
-ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3
+# ---------------------------------------------------------------------------
+# Tier 4 — SEO Expansion (World + US cities)
+# ---------------------------------------------------------------------------
+TIER_4: list[CityListing] = [
+    # World cities
+    CityListing(
+        city="London", state="England", country="UK",
+        lat=51.5074, lon=-0.1278, distance=12000, tier=4,
+        hero_feature="Thames + dense historic street web",
+        display_subtitle="England",
+    ),
+    CityListing(
+        city="Paris", state="Île-de-France", country="France",
+        lat=48.8566, lon=2.3522, distance=10000, tier=4,
+        hero_feature="Haussmann boulevards radiating from Arc de Triomphe",
+        display_subtitle="France",
+    ),
+    CityListing(
+        city="Tokyo", state="Kantō", country="Japan",
+        lat=35.6762, lon=139.6503, distance=12000, tier=4,
+        hero_feature="Dense organic street network + Imperial Palace void",
+        display_subtitle="Japan",
+    ),
+    CityListing(
+        city="Rome", state="Lazio", country="Italy",
+        lat=41.9028, lon=12.4964, distance=10000, tier=4,
+        hero_feature="Tiber River + ancient radial streets",
+        display_subtitle="Italy",
+    ),
+    CityListing(
+        city="Barcelona", state="Catalonia", country="Spain",
+        lat=41.3874, lon=2.1686, distance=10000, tier=4,
+        hero_feature="Eixample superblock grid + Gothic quarter contrast",
+        display_subtitle="Spain",
+    ),
+    CityListing(
+        city="Amsterdam", state="North Holland", country="Netherlands",
+        lat=52.3676, lon=4.9041, distance=8000, tier=4,
+        hero_feature="Concentric canal rings",
+        display_subtitle="Netherlands",
+    ),
+    CityListing(
+        city="Lisbon", state="Lisboa", country="Portugal",
+        lat=38.7223, lon=-9.1393, distance=8000, tier=4,
+        hero_feature="Hillside streets + Tagus riverfront",
+        display_subtitle="Portugal",
+    ),
+    # US cities not in Tiers 1-3
+    CityListing(
+        city="Philadelphia", state="Pennsylvania", country="USA",
+        lat=39.9526, lon=-75.1652, distance=10000, tier=4,
+        hero_feature="Original grid plan + Schuylkill/Delaware rivers",
+    ),
+    CityListing(
+        city="San Diego", state="California", country="USA",
+        lat=32.7157, lon=-117.1611, distance=10000, tier=4,
+        hero_feature="Harbor + Coronado + sprawling coast grid",
+    ),
+]
+
+ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3 + TIER_4
 
 
 def get_cities_by_tier(tier: int) -> list[CityListing]:
-    """Return cities for a specific tier (1, 2, or 3)."""
+    """Return cities for a specific tier (1, 2, 3, or 4)."""
     return [c for c in ALL_CITIES if c.tier == tier]
 
 
