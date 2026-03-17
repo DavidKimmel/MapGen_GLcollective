@@ -88,6 +88,19 @@ python cli.py --location "Portland, Oregon" --layout date_night --crop heart \
   --font-preset 3 --pin-style 2 --pin-color "#CC3333" \
   --text-line-1 "Names" --text-line-2 "Tagline" \
   --text-line-3 "City, State" --text-line-4 "Date"
+
+# Generate mockup images for a city (uses slug, not display name)
+python -m etsy.mockup_composer --city city_slug
+
+# Generate listing images (detail crop + size comparison)
+python -m etsy.image_composer --city "City Name" --all
+
+# Batch render new cities (all sizes + listing images)
+python batch_seo_render.py
+python batch_seo_render.py --start-from "City Name"  # resume
+
+# Upload all city renders to Dropbox
+python batch_dropbox_upload.py
 ```
 
 ## Rendering

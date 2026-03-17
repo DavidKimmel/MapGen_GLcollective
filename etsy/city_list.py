@@ -98,7 +98,7 @@ TIER_2: list[CityListing] = [
     ),
     CityListing(
         city="Miami", state="Florida", country="USA",
-        lat=25.7617, lon=-80.1918, distance=8000, tier=2,
+        lat=25.7617, lon=-80.1918, distance=10000, tier=2,
         hero_feature="Barrier island geography + Biscayne Bay",
     ),
     CityListing(
@@ -193,7 +193,7 @@ TIER_4: list[CityListing] = [
     ),
     CityListing(
         city="Tokyo", state="Kantō", country="Japan",
-        lat=35.6762, lon=139.6503, distance=12000, tier=4,
+        lat=35.6812, lon=139.7671, distance=11000, tier=4,
         hero_feature="Dense organic street network + Imperial Palace void",
         display_subtitle="Japan",
     ),
@@ -231,6 +231,11 @@ TIER_4: list[CityListing] = [
         city="San Diego", state="California", country="USA",
         lat=32.7157, lon=-117.1611, distance=10000, tier=4,
         hero_feature="Harbor + Coronado + sprawling coast grid",
+    ),
+    CityListing(
+        city="Baltimore", state="Maryland", country="USA",
+        lat=39.2904, lon=-76.6122, distance=8000, tier=4,
+        hero_feature="Inner Harbor + Patapsco River + dense row house grid",
     ),
 ]
 

@@ -57,20 +57,32 @@ def _load_api_key() -> str:
 # ---------------------------------------------------------------------------
 
 def gelato_api(api_key: str, method: str, endpoint: str,
-               payload: dict | None = None) -> dict:
-    """Call Gelato ecommerce API via curl."""
+               payload: dict | None = None, retries: int = 3) -> dict:
+    """Call Gelato ecommerce API via curl with timeout and retry."""
     url = f"{BASE_URL}/{endpoint}"
     cmd = [
-        "curl", "-s", "-X", method, url,
+        "curl", "-s", "--max-time", "120", "-X", method, url,
         "-H", f"X-API-KEY: {api_key}",
         "-H", "Content-Type: application/json",
     ]
     if payload:
         cmd += ["-d", json.dumps(payload)]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if not result.stdout.strip():
-        return {}
-    return json.loads(result.stdout)
+
+    for attempt in range(retries):
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        stdout = result.stdout.strip()
+        if not stdout:
+            return {}
+        try:
+            return json.loads(stdout)
+        except json.JSONDecodeError:
+            if attempt < retries - 1:
+                import time
+                time.sleep(3)
+                continue
+            raise RuntimeError(
+                f"Gelato API returned invalid JSON after {retries} attempts: {stdout[:200]}"
+            )
 
 
 def get_gelato_products(api_key: str) -> list[dict]:
