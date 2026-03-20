@@ -26,7 +26,7 @@ class CityListing:
 
     @property
     def slug(self) -> str:
-        return self.city.lower().replace(" ", "_").replace("'", "")
+        return self.city.lower().replace(" ", "_").replace("'", "").replace(".", "")
 
 
 # ---------------------------------------------------------------------------
@@ -239,11 +239,130 @@ TIER_4: list[CityListing] = [
     ),
 ]
 
-ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3 + TIER_4
+# ---------------------------------------------------------------------------
+# Tier 5 — Expansion (US + World cities)
+# ---------------------------------------------------------------------------
+TIER_5: list[CityListing] = [
+    # US cities
+    CityListing(
+        city="Los Angeles", state="California", country="USA",
+        lat=34.0522, lon=-118.2437, distance=12000, tier=5,
+        hero_feature="Coastline + sprawling grid + LA River",
+    ),
+    CityListing(
+        city="Houston", state="Texas", country="USA",
+        lat=29.7604, lon=-95.3698, distance=10000, tier=5,
+        hero_feature="Bayou network threading through sprawling grid",
+    ),
+    CityListing(
+        city="San Antonio", state="Texas", country="USA",
+        lat=29.4241, lon=-98.4936, distance=8000, tier=5,
+        hero_feature="River Walk curves through downtown grid",
+    ),
+    CityListing(
+        city="Detroit", state="Michigan", country="USA",
+        lat=42.3314, lon=-83.0458, distance=8000, tier=5,
+        hero_feature="Detroit River border + Woodward radial avenues",
+    ),
+    CityListing(
+        city="St. Louis", state="Missouri", country="USA",
+        lat=38.6270, lon=-90.1994, distance=8000, tier=5,
+        hero_feature="Mississippi River + downtown grid near Gateway Arch",
+        display_city="St. Louis", display_subtitle="Missouri",
+    ),
+    CityListing(
+        city="Cincinnati", state="Ohio", country="USA",
+        lat=39.1031, lon=-84.5120, distance=7000, tier=5,
+        hero_feature="Ohio River horseshoe bend + hillside streets",
+    ),
+    CityListing(
+        city="Tampa", state="Florida", country="USA",
+        lat=27.9506, lon=-82.4572, distance=10000, tier=5,
+        hero_feature="Tampa Bay peninsula + Hillsborough River",
+    ),
+    CityListing(
+        city="Milwaukee", state="Wisconsin", country="USA",
+        lat=43.0389, lon=-87.9065, distance=8000, tier=5,
+        hero_feature="Lake Michigan shoreline + three rivers confluence",
+    ),
+    CityListing(
+        city="Kansas City", state="Missouri", country="USA",
+        lat=39.0997, lon=-94.5786, distance=8000, tier=5,
+        hero_feature="Missouri River + grid straddling state line",
+    ),
+    CityListing(
+        city="Cleveland", state="Ohio", country="USA",
+        lat=41.4993, lon=-81.6944, distance=8000, tier=5,
+        hero_feature="Lake Erie shoreline + Cuyahoga River bends",
+    ),
+    # World cities
+    CityListing(
+        city="Berlin", state="Berlin", country="Germany",
+        lat=52.5200, lon=13.4050, distance=10000, tier=5,
+        hero_feature="Spree River + Tiergarten void + unified grid",
+        display_subtitle="Germany",
+    ),
+    CityListing(
+        city="Dublin", state="Leinster", country="Ireland",
+        lat=53.3498, lon=-6.2603, distance=8000, tier=5,
+        hero_feature="Liffey River + Georgian street grid",
+        display_subtitle="Ireland",
+    ),
+    CityListing(
+        city="Edinburgh", state="Scotland", country="UK",
+        lat=55.9533, lon=-3.1883, distance=7000, tier=5,
+        hero_feature="Old Town ridge + New Town grid contrast",
+        display_subtitle="Scotland",
+    ),
+    CityListing(
+        city="Prague", state="Bohemia", country="Czech Republic",
+        lat=50.0755, lon=14.4378, distance=8000, tier=5,
+        hero_feature="Vltava River bends + medieval street web",
+        display_subtitle="Czech Republic",
+    ),
+    CityListing(
+        city="Vienna", state="Vienna", country="Austria",
+        lat=48.2082, lon=16.3738, distance=10000, tier=5,
+        hero_feature="Ringstrasse ring road + Danube Canal",
+        display_subtitle="Austria",
+    ),
+    CityListing(
+        city="Copenhagen", state="Hovedstaden", country="Denmark",
+        lat=55.6761, lon=12.5683, distance=8000, tier=5,
+        hero_feature="Harbor + canal district + Christiania",
+        display_subtitle="Denmark",
+    ),
+    CityListing(
+        city="Istanbul", state="Istanbul", country="Turkey",
+        lat=41.0082, lon=28.9784, distance=12000, tier=5,
+        hero_feature="Bosphorus strait + Golden Horn + two continents",
+        display_subtitle="Turkey",
+    ),
+    CityListing(
+        city="Sydney", state="New South Wales", country="Australia",
+        lat=-33.8688, lon=151.2093, distance=10000, tier=5,
+        hero_feature="Harbor + Opera House peninsula + bridge",
+        display_subtitle="Australia",
+    ),
+    CityListing(
+        city="Florence", state="Tuscany", country="Italy",
+        lat=43.7696, lon=11.2558, distance=6000, tier=5,
+        hero_feature="Arno River + tight Renaissance street grid",
+        display_subtitle="Italy",
+    ),
+    CityListing(
+        city="Stockholm", state="Stockholm", country="Sweden",
+        lat=59.3293, lon=18.0686, distance=8000, tier=5,
+        hero_feature="14-island archipelago city + waterways",
+        display_subtitle="Sweden",
+    ),
+]
+
+ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3 + TIER_4 + TIER_5
 
 
 def get_cities_by_tier(tier: int) -> list[CityListing]:
-    """Return cities for a specific tier (1, 2, 3, or 4)."""
+    """Return cities for a specific tier."""
     return [c for c in ALL_CITIES if c.tier == tier]
 
 

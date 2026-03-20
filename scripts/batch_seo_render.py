@@ -23,7 +23,7 @@ RENDERS_DIR = os.path.join("etsy", "renders")
 
 
 def get_cities_to_render():
-    """Get cities that need rendering (unrendered Tier 1-3 + all Tier 4)."""
+    """Get cities that need rendering (unrendered Tier 1-3 + all Tier 4-5)."""
     from etsy.city_list import ALL_CITIES, get_cities_by_tier
     cities = []
     for c in ALL_CITIES:
@@ -32,6 +32,7 @@ def get_cities_to_render():
             if not os.path.exists(check):
                 cities.append(c)
     cities.extend(get_cities_by_tier(4))
+    cities.extend(get_cities_by_tier(5))
     return cities
 
 

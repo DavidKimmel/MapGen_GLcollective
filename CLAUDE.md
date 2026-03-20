@@ -10,8 +10,9 @@ Minimalist city map art prints sold on Etsy. Digital downloads + physical prints
 
 ## Current Status
 
-- **35 cities rendered** — all have 5 sizes at 300 DPI + detail crops + size comparisons + mockups
+- **55 cities rendered** — all have 5 sizes at 300 DPI + detail crops + size comparisons + mockups
 - **14 cities Gelato-connected** — Barcelona, Asheville, Rome, Raleigh, Portland, Pittsburgh, London, Philadelphia, Paris, New Orleans, Tokyo, Baltimore, Lisbon, Atlanta, Austin
+- **26 draft listings on Etsy** — title/description/SKUs set, need images + tag fix before publishing
 - **Custom map listing live** — `custom_fulfill.py` pipeline built
 - **Date Night listing ready** — layout built, samples rendered, SKUs generated
 - **Renders organized** — completed cities in `etsy/renders/Posted/`, in-progress in `etsy/renders/`
@@ -200,12 +201,13 @@ python -m etsy.gelato_connect --city "City Name"
 ### Date Night Pricing (GLC-DATE-* SKUs)
 Same as custom map pricing. 10 variants: 5 digital + 5 unframed.
 
-## Cities (35 total, 4 tiers)
+## Cities (55 total, 5 tiers)
 
 **Tier 1 (10):** Chicago, New York, Washington DC, New Orleans, Nashville, Austin, Seattle, San Francisco, Portland, Denver
 **Tier 2 (10):** Boston, Miami, Atlanta, Minneapolis, Pittsburgh, Savannah, Charleston, Asheville, Salt Lake City, Honolulu
 **Tier 3 (5):** Richmond, Chattanooga, Boise, Raleigh, Charlotte
 **Tier 4 — SEO Expansion (10):** London, Paris, Tokyo, Rome, Barcelona, Amsterdam, Lisbon, Philadelphia, San Diego, Baltimore
+**Tier 5 — Expansion (20):** Los Angeles, Houston, San Antonio, Detroit, St. Louis, Cincinnati, Tampa, Milwaukee, Kansas City, Cleveland, Berlin, Dublin, Edinburgh, Prague, Vienna, Copenhagen, Istanbul, Sydney, Florence, Stockholm
 
 ## Mockup System
 

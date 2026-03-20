@@ -336,6 +336,129 @@ _CITY_INTROS: dict[str, str] = {
         "this map print captures Southern California's most laid-back city in stunning "
         "cartographic detail."
     ),
+    "Baltimore": (
+        "The Inner Harbor anchors Baltimore's waterfront while the Patapsco River opens to the "
+        "Chesapeake Bay. From the dense row house grid of Federal Hill to the cobblestone streets "
+        "of Fells Point, this map print captures Charm City's gritty, beautiful geography in "
+        "striking cartographic detail."
+    ),
+    # --- Tier 5: US Expansion ---
+    "Los Angeles": (
+        "LA's endless grid stretches from the Pacific Coast to the foothills of the San Gabriel "
+        "Mountains, crossed by the concrete channel of the LA River. From the tight blocks of "
+        "downtown to the winding canyons of Hollywood Hills, this map print captures the sheer "
+        "scale of the City of Angels in stunning black and white detail."
+    ),
+    "Houston": (
+        "Buffalo Bayou winds through downtown Houston while a network of bayous threads through "
+        "the city's sprawling grid. This map print captures the energy capital of the world — "
+        "from the Texas Medical Center to the Heights — in clean, modern cartographic detail."
+    ),
+    "San Antonio": (
+        "The San Antonio River curves its famous walk through the heart of downtown, connecting "
+        "the Alamo to the King William historic district. This map print captures the Alamo "
+        "City's blend of Spanish colonial streets and modern Texas grid in elegant black and "
+        "white detail."
+    ),
+    "Detroit": (
+        "The Detroit River forms an international border as Woodward Avenue and other grand "
+        "radial boulevards fan outward from the waterfront. This map print captures the Motor "
+        "City's bold street geometry — designed by Augustus Woodward — in striking minimalist "
+        "cartographic detail."
+    ),
+    "St. Louis": (
+        "The Mississippi River defines St. Louis's eastern edge, with the Gateway Arch marking "
+        "where the city's grid meets the waterfront. From the historic brick neighborhoods of "
+        "Soulard to the grand avenues of the Central West End, this map print captures the "
+        "Gateway to the West in elegant cartographic detail."
+    ),
+    "Cincinnati": (
+        "The Ohio River bends in a dramatic horseshoe around downtown Cincinnati, with streets "
+        "climbing steep hillsides in every direction. From Over-the-Rhine's dense urban grid to "
+        "the riverfront stadiums, this map print captures the Queen City's river-carved geography "
+        "in striking black and white detail."
+    ),
+    "Tampa": (
+        "Tampa Bay wraps around the city's western shore while the Hillsborough River cuts "
+        "through downtown. From the brick streets of Ybor City to the waterfront of Bayshore "
+        "Boulevard, this map print captures Florida's Gulf Coast gem in clean, modern "
+        "cartographic detail."
+    ),
+    "Milwaukee": (
+        "Lake Michigan forms Milwaukee's dramatic eastern edge while the Milwaukee, Menomonee, "
+        "and Kinnickinnic rivers converge downtown. This map print captures the Cream City's "
+        "lakefront geography and historic Third Ward in elegant black and white detail."
+    ),
+    "Kansas City": (
+        "The Missouri River bends along Kansas City's northern edge while the city's grid "
+        "straddles the Missouri-Kansas state line. From the Country Club Plaza to the Crossroads "
+        "Arts District, this map print captures the Heart of America's bold geometry in clean "
+        "cartographic detail."
+    ),
+    "Cleveland": (
+        "Lake Erie stretches north beyond the city skyline while the Cuyahoga River's famous "
+        "bends wind through the Flats. This map print captures Cleveland's lakefront geography "
+        "and resilient urban grid — from University Circle to Ohio City — in striking "
+        "minimalist detail."
+    ),
+    # --- Tier 5: World Expansion ---
+    "Berlin": (
+        "The Spree River meanders past the Reichstag and Museum Island while the vast Tiergarten "
+        "creates a green void at the city's heart. This map print captures Berlin's reunified "
+        "street grid — from the Brandenburg Gate to Kreuzberg's dense blocks — in stunning "
+        "cartographic detail."
+    ),
+    "Dublin": (
+        "The River Liffey divides Dublin's northside from its Georgian southside, flowing past "
+        "the Ha'penny Bridge and the Custom House to Dublin Bay. This map print captures the "
+        "Irish capital's compact, walkable street grid in elegant black and white detail."
+    ),
+    "Edinburgh": (
+        "Edinburgh's Old Town clings to a volcanic ridge while the Georgian New Town spreads in "
+        "a perfect grid below — a contrast that earned this city UNESCO World Heritage status. "
+        "This map print captures the Scottish capital's dramatic hilltop geography in stunning "
+        "cartographic detail."
+    ),
+    "Prague": (
+        "The Vltava River bends through Prague's heart, connecting the castle district of "
+        "Hradcany to the medieval lanes of Stare Mesto. This map print captures the City of a "
+        "Hundred Spires — its bridges, islands, and winding Baroque streets — in elegant "
+        "black and white detail."
+    ),
+    "Vienna": (
+        "The Ringstrasse encircles Vienna's imperial core — a grand boulevard replacing the "
+        "old city walls — while the Danube Canal cuts through the eastern districts. This map "
+        "print captures the City of Music's elegant radial geometry in clean, modern "
+        "cartographic detail."
+    ),
+    "Copenhagen": (
+        "Copenhagen's harbor district and canal-laced Christianshavn sit alongside the medieval "
+        "streets of the old city. This map print captures the Danish capital's waterfront "
+        "geography — from Nyhavn to the free town of Christiania — in striking minimalist detail."
+    ),
+    "Istanbul": (
+        "The Bosphorus strait splits Istanbul across two continents while the Golden Horn "
+        "inlet divides the European side into old and new. This map print captures the "
+        "transcontinental city's extraordinary geography — connecting Asia and Europe — in "
+        "stunning cartographic detail."
+    ),
+    "Sydney": (
+        "Sydney Harbour's jagged inlets wind past the Opera House and under the Harbour Bridge "
+        "while the Pacific Ocean defines the eastern beaches. This map print captures Australia's "
+        "harbor city — from Circular Quay to Bondi — in elegant black and white detail."
+    ),
+    "Florence": (
+        "The Arno River crosses Florence beneath the Ponte Vecchio, dividing the Renaissance "
+        "city's tight medieval grid from the Oltrarno artisan quarter. This map print captures "
+        "the cradle of the Renaissance — compact, beautiful, and timeless — in stunning "
+        "cartographic detail."
+    ),
+    "Stockholm": (
+        "Stockholm spreads across 14 islands where Lake Malaren meets the Baltic Sea, connected "
+        "by 57 bridges. This map print captures the Scandinavian capital's unique archipelago "
+        "geography — from Gamla Stan's medieval lanes to Sodermalm's hipster grid — in elegant "
+        "black and white detail."
+    ),
 }
 
 
