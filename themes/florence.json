@@ -1,0 +1,14 @@
+{
+    "name": "Florence",
+    "renderer": "florence",
+    "palette": [
+        "#E8760A", "#F5A623", "#F4A68C", "#4ECDC4", "#2C3E50",
+        "#BDC3C7", "#7A9E6B", "#C0392B", "#D4752A", "#4A6A5A"
+    ],
+    "bg_color": "#E8760A",
+    "water_color": "#F0EBE1",
+    "street_color": "#F0EBE1",
+    "poster_bg": "#F0EBE1",
+    "text_color": "#2C3E50",
+    "font": "Switzer-Bold.ttf"
+}

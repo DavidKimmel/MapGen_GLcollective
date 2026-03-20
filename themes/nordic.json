@@ -1,0 +1,17 @@
+{
+    "name": "Simple Nordic",
+    "renderer": "nordic",
+    "bg_color": "#3A5A78",
+    "parks_color": "#4A7A6A",
+    "street_color": "#FFFFFF",
+    "water_color": "#FFFFFF",
+    "text_color": "#1A1A1A",
+    "poster_bg": "#FFFFFF",
+    "street_widths": {
+        "motorway": 3.0, "trunk": 3.0, "primary": 2.5, "primary_link": 2.5,
+        "motorway_link": 2.0, "secondary": 2.0, "secondary_link": 2.0,
+        "tertiary": 1.5, "tertiary_link": 1.0, "cycleway": 0,
+        "residential": 0.5, "service": 0, "unclassified": 0,
+        "pedestrian": 0, "footway": 0
+    }
+}
