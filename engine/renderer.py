@@ -164,6 +164,27 @@ def render_poster(
     safe_print("MapGen — Poster Renderer")
     safe_print(f"{'='*60}")
 
+    # Renderer dispatch — route to dedicated renderers before existing pipeline
+    theme_data = load_theme(theme)
+    renderer_type = theme_data.get("renderer")
+    if renderer_type == "florence":
+        from engine.florence_renderer import render_florence_poster
+        return render_florence_poster(
+            location=location, theme_data=theme_data, size=size,
+            dpi=dpi, output_path=output_path, distance=distance,
+            map_only=map_only,
+        )
+    elif renderer_type == "nordic":
+        from engine.nordic_renderer import render_nordic_poster
+        return render_nordic_poster(
+            location=location, theme_data=theme_data, size=size,
+            dpi=dpi, output_path=output_path, distance=distance,
+            map_only=map_only,
+        )
+    elif renderer_type is not None:
+        raise ValueError(f"Unknown renderer type: {renderer_type}")
+
+    # 1. Parse location, geocode
     lat, lon, geocode_result = parse_location(location)
     point = (lat, lon)
 
@@ -179,8 +200,6 @@ def render_poster(
     height_in = size_config["height_in"]
     if distance is None:
         distance = size_config["distance_m"]
-
-    theme_data = load_theme(theme)
 
     safe_print(f"  Size: {size} ({width_in}x{height_in} in)")
     safe_print(f"  Distance: {distance}m")
