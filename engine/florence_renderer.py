@@ -53,16 +53,56 @@ WATER_TAGS: dict = {
     "water": True,
 }
 
+# ─── LANDUSE TYPE → PALETTE INDEX (semantic coloring) ─────────────────────────
+# Ensures different landuse types get different colors, reducing monotone blocks.
+
+TYPE_SEED: dict[str, int] = {
+    "farmland": 0, "farmyard": 0, "orchard": 0, "vineyard": 0,
+    "forest": 6, "wood": 6,
+    "scrub": 2, "heath": 2,
+    "grassland": 1, "meadow": 3, "grass": 3,
+    "park": 3, "garden": 3, "nature_reserve": 6,
+    "residential": 0, "commercial": 4, "retail": 4,
+    "industrial": 5, "construction": 5, "military": 6,
+    "cemetery": 7, "allotments": 1,
+    "beach": 7, "sand": 7, "bare_rock": 5,
+    "aerodrome": 8, "quarry": 5,
+    "recreation_ground": 3, "pitch": 3, "golf_course": 3,
+    "university": 5, "hospital": 4, "school": 7,
+}
+
+
+def _get_type_color(
+    val: str, palette: list[str], used_map: dict[str, str],
+) -> str:
+    """Return a consistent color for a landuse/natural type value."""
+    val = str(val).lower().strip() if val else "unknown"
+    if val not in used_map:
+        idx = TYPE_SEED.get(val, hash(val) % len(palette))
+        used_map[val] = palette[idx % len(palette)]
+    return used_map[val]
+
+
+def _assign_color(row, palette: list[str], used_map: dict[str, str]) -> str:
+    """Assign color based on landuse > natural > leisure > amenity type."""
+    for col in ["landuse", "natural", "leisure", "amenity"]:
+        if col in row.index and row[col] not in [None, "nan", ""]:
+            val = row[col]
+            if val is not None and str(val) != "nan":
+                return _get_type_color(str(val), palette, used_map)
+    return random.choice(palette)
+
+
 # ─── STREET WIDTHS ───────────────────────────────────────────────────────────
 
 STREET_WEIGHTS: dict[str, float] = {
-    "motorway": 1.2, "motorway_link": 0.8,
-    "trunk": 1.0, "trunk_link": 0.7,
-    "primary": 0.8, "primary_link": 0.6,
-    "secondary": 0.6, "secondary_link": 0.5,
-    "tertiary": 0.4, "tertiary_link": 0.3,
-    "residential": 0.25, "unclassified": 0.25,
-    "service": 0.15, "living_street": 0.2,
+    "motorway": 2.5, "motorway_link": 1.8,
+    "trunk": 2.2, "trunk_link": 1.5,
+    "primary": 1.8, "primary_link": 1.2,
+    "secondary": 1.4, "secondary_link": 1.0,
+    "tertiary": 0.9, "tertiary_link": 0.6,
+    "residential": 0.5, "unclassified": 0.5,
+    "service": 0.3, "living_street": 0.4,
 }
 
 
@@ -88,6 +128,7 @@ def render_florence_map(
     fig_height: float = 20,
     output_path: str = "",
     seed: int = 42,
+    skip_landuse: bool = True,
 ) -> str:
     """Render a Florence-style city block mosaic map.
 
@@ -124,19 +165,34 @@ def render_florence_map(
     safe_print(f"  {len(blocks)} city blocks generated")
 
     # 3. Fetch landuse/natural/leisure features (NO water)
-    safe_print("  Fetching landuse features...")
-    try:
-        features = ox.features_from_point((lat, lon), FEATURE_TAGS, dist=radius)
-        features = features[
-            features.geometry.type.isin(["Polygon", "MultiPolygon"])
-        ].copy()
-        features = features.to_crs(utm_crs)
-        features = gpd.clip(features, aoi_box)
-        features["color"] = [random.choice(palette) for _ in range(len(features))]
-        safe_print(f"  {len(features)} landuse features")
-    except Exception as e:
-        safe_print(f"  Warning: could not fetch landuse: {e}")
+    if skip_landuse:
+        safe_print("  Skipping landuse overlay (pure mosaic mode)")
         features = gpd.GeoDataFrame(columns=["geometry", "color"], crs=utm_crs)
+    else:
+        safe_print("  Fetching landuse features...")
+        try:
+            features = ox.features_from_point((lat, lon), FEATURE_TAGS, dist=radius)
+            features = features[
+                features.geometry.type.isin(["Polygon", "MultiPolygon"])
+            ].copy()
+            features = features.to_crs(utm_crs)
+            features = gpd.clip(features, aoi_box)
+            # Drop residential landuse — let the random-colored blocks show through
+            if "landuse" in features.columns:
+                residential_mask = features["landuse"].isin(["residential", "construction"])
+                dropped = residential_mask.sum()
+                features = features[~residential_mask].copy()
+                if dropped > 0:
+                    safe_print(f"  Dropped {dropped} residential/construction polygons")
+            # Semantic coloring for remaining features
+            used_map: dict[str, str] = {}
+            features["color"] = features.apply(
+                lambda row: _assign_color(row, palette, used_map), axis=1
+            )
+            safe_print(f"  {len(features)} landuse features (after filtering)")
+        except Exception as e:
+            safe_print(f"  Warning: could not fetch landuse: {e}")
+            features = gpd.GeoDataFrame(columns=["geometry", "color"], crs=utm_crs)
 
     # 4. Fetch water separately
     safe_print("  Fetching water...")
@@ -172,7 +228,7 @@ def render_florence_map(
 
     # Layer 4 (top): Streets as thin cream lines
     for lw_val, group in edges.groupby("lw"):
-        group.plot(ax=ax, color=street_color, linewidth=lw_val, alpha=0.9, zorder=4)
+        group.plot(ax=ax, color=street_color, linewidth=lw_val, alpha=1.0, zorder=4)
 
     bounds = [
         center_proj.x - radius, center_proj.y - radius,
@@ -201,10 +257,13 @@ def render_florence_poster(
     output_path: str | None = None,
     distance: int | None = None,
     map_only: bool = False,
+    city_name: str | None = None,
+    state_name: str | None = None,
 ) -> str:
     """Main entry point for Florence renderer — called by dispatcher.
 
     Handles geocoding, renders map, composes poster, returns str path.
+    city_name/state_name overrides allow batch scripts to set display text.
     """
     t_start = time.time()
 
@@ -214,9 +273,10 @@ def render_florence_poster(
 
     # Parse location
     lat, lon, geocode_result = parse_location(location)
-    city_name, state_name = extract_city_state(geocode_result)
     if city_name is None:
-        city_name = location.split(",")[0].strip()
+        city_name, state_name = extract_city_state(geocode_result)
+        if city_name is None:
+            city_name = location.split(",")[0].strip()
 
     # Size config
     size_config = get_size_config(size)
