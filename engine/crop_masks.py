@@ -76,8 +76,8 @@ def apply_circle_crop(ax, fig, bg_color="#FFFFFF"):
     safe_print("  Circle crop applied")
 
 
-def apply_house_crop(ax, fig, bg_color="#FFFFFF"):
-    """Apply a house-shaped crop mask with chimney and floating hearts."""
+def apply_house_crop(ax, fig, bg_color="#FFFFFF", chimney_text: str | None = None):
+    """Apply a house-shaped crop mask with chimney and optional text/hearts."""
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
     x_range = xlim[1] - xlim[0]
@@ -175,9 +175,51 @@ def apply_house_crop(ax, fig, bg_color="#FFFFFF"):
     )
     ax.add_patch(border_patch)
 
-    _draw_chimney_hearts(ax, fig, chimney_center_x, chimney_top, inner_x, inner_y,
-                         stroke_color=_border_color(bg_color))
-    safe_print("  House crop applied (with chimney + hearts)")
+    if chimney_text:
+        _draw_chimney_text(fig, chimney_center_x, chimney_top, inner_x, inner_y,
+                           text=chimney_text, ax=ax,
+                           text_color=_border_color(bg_color),
+                           chimney_width_data=chimney_width)
+        safe_print(f"  House crop applied (chimney text: {chimney_text})")
+    else:
+        _draw_chimney_hearts(ax, fig, chimney_center_x, chimney_top, inner_x, inner_y,
+                             stroke_color=_border_color(bg_color))
+        safe_print("  House crop applied (with chimney + hearts)")
+
+
+def _draw_chimney_text(fig, chimney_cx, chimney_top, house_w, house_h,
+                       text: str, ax=None, text_color: str = "#2C2C2C",
+                       chimney_width_data: float = 0):
+    """Draw text (e.g., year) centered above the chimney, spanning its width."""
+    import os
+    from matplotlib.font_manager import FontProperties
+
+    inv = ax.transData + fig.transFigure.inverted()
+    fig_x, fig_y = inv.transform((chimney_cx, chimney_top))
+
+    # Get chimney width in figure coords for font sizing
+    chim_left_fig, _ = inv.transform((chimney_cx - chimney_width_data / 2, chimney_top))
+    chim_right_fig, _ = inv.transform((chimney_cx + chimney_width_data / 2, chimney_top))
+    chim_width_fig = chim_right_fig - chim_left_fig
+
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts")
+    font_path = os.path.join(fonts_dir, "FootlightMTLight-Regular.ttf")
+    # Scale font to span chimney width (tuned for 4-char year like "2025")
+    font_size = chim_width_fig * fig.get_figwidth() * 72 * 0.50
+    font_size = max(font_size, 14)
+    if os.path.exists(font_path):
+        font_props = FontProperties(fname=font_path, size=font_size)
+    else:
+        font_props = FontProperties(family="serif", size=font_size)
+
+    fig.text(
+        fig_x, fig_y + 0.004,
+        text,
+        color=text_color,
+        ha="center", va="bottom",
+        fontproperties=font_props,
+        zorder=16,
+    )
 
 
 def _draw_chimney_hearts(ax, fig, chimney_cx, chimney_top, house_w, house_h,

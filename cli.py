@@ -43,8 +43,8 @@ def main():
                         help="Pin style: 1=heart, 2=heart-pin, 3=classic, 4=house, 5=grad cap")
     parser.add_argument("--pin-color", default=None,
                         help="Custom hex color for pin (e.g., #D4736B)")
-    parser.add_argument("--font-preset", type=int, default=1, choices=[1, 2, 3, 4, 5],
-                        help="Font preset: 1=sans, 2=serif, 3=script, 4=cursive, 5=classic")
+    parser.add_argument("--font-preset", type=int, default=1, choices=[1, 2, 3, 4, 5, 6],
+                        help="Font preset: 1=sans, 2=serif, 3=script, 4=cursive, 5=classic, 6=house")
     parser.add_argument("--text-line-1", default=None,
                         help="Large title text (e.g., 'Our First Home')")
     parser.add_argument("--text-line-2", default=None,
@@ -60,6 +60,8 @@ def main():
                         help="Resolution in DPI (default: 300)")
     parser.add_argument("--output", "-o", default=None,
                         help="Output file path (auto-generated if not set)")
+    parser.add_argument("--chimney-text", default=None,
+                        help="Text to display above chimney (e.g., year '2025')")
     parser.add_argument("--border", action="store_true",
                         help="Add double-line border")
     parser.add_argument("--map-only", action="store_true",
@@ -93,6 +95,7 @@ def main():
             text_line_2=args.text_line_2,
             text_line_3=args.text_line_3,
             text_line_4=args.text_line_4,
+            chimney_text=args.chimney_text,
             layout=args.layout,
             dpi=args.dpi,
             output_path=args.output,

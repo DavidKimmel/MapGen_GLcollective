@@ -202,22 +202,30 @@ def get_filler_cities(featured_slug: str, count: int, render_size: str) -> list[
 
 
 def fit_to_slot(city_render: Image.Image, slot: MockupSlot) -> Image.Image:
-    """Fit a city render into a slot, preserving aspect ratio with white fill."""
+    """Fit a city render into a slot, preserving aspect ratio with white fill.
+
+    Always fits entirely within the slot — never crops. Pads with white
+    on the shorter dimension.
+    """
     render_ratio = city_render.width / city_render.height
     slot_ratio = slot.aspect_ratio
 
     if abs(render_ratio - slot_ratio) < 0.01:
         return city_render.resize((slot.width, slot.height), Image.LANCZOS)
 
-    # Fit to width, pad height with white
-    scaled_w = slot.width
-    scaled_h = round(slot.width / render_ratio)
+    # Fit to the dimension that keeps the entire render visible (no cropping)
+    scale_by_width = slot.width / city_render.width
+    scale_by_height = slot.height / city_render.height
+    scale = min(scale_by_width, scale_by_height)
 
+    scaled_w = round(city_render.width * scale)
+    scaled_h = round(city_render.height * scale)
     scaled = city_render.resize((scaled_w, scaled_h), Image.LANCZOS)
 
     canvas = Image.new("RGBA", (slot.width, slot.height), (255, 255, 255, 255))
+    x_offset = (slot.width - scaled_w) // 2
     y_offset = (slot.height - scaled_h) // 2
-    canvas.paste(scaled, (0, y_offset), scaled)
+    canvas.paste(scaled, (x_offset, y_offset), scaled)
     return canvas
 
 

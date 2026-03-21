@@ -2,10 +2,11 @@
     "name": "Florence",
     "renderer": "florence",
     "palette": [
-        "#E8760A", "#F5A623", "#F4A68C", "#4ECDC4", "#2C3E50",
-        "#BDC3C7", "#7A9E6B", "#C0392B", "#D4752A", "#4A6A5A"
+        "#E8760A", "#F5A623", "#D4752A", "#C4943C", "#F4A68C",
+        "#E8C4A0", "#B8956A", "#2C3E50", "#4A4A4A", "#9A9A8A",
+        "#BDC3C7", "#7A9E6B", "#4A6A5A", "#4ECDC4"
     ],
-    "bg_color": "#E8760A",
+    "bg_color": "#F0EBE1",
     "water_color": "#F0EBE1",
     "street_color": "#F0EBE1",
     "poster_bg": "#F0EBE1",

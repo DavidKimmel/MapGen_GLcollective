@@ -4,15 +4,14 @@ Minimalist city map art prints sold on Etsy. Digital downloads + physical prints
 
 ## Products
 
-1. **Pre-made city maps** — 35 cities across 4 tiers, 20 variants each (5 digital + 5 unframed + 5 framed black + 5 framed white)
+1. **Pre-made city maps** — 55 cities across 5 tiers, 20 variants each (5 digital + 5 unframed + 5 framed black + 5 framed white)
 2. **Custom map listing** — any location, full/circle crop, 10 SKUs (5 digital + 5 unframed)
 3. **Date Night heart map** — heart crop with names above, date_night layout, 10 SKUs (5 digital + 5 unframed)
 
 ## Current Status
 
 - **55 cities rendered** — all have 5 sizes at 300 DPI + detail crops + size comparisons + mockups
-- **14 cities Gelato-connected** — Barcelona, Asheville, Rome, Raleigh, Portland, Pittsburgh, London, Philadelphia, Paris, New Orleans, Tokyo, Baltimore, Lisbon, Atlanta, Austin
-- **26 draft listings on Etsy** — title/description/SKUs set, need images + tag fix before publishing
+- **All city listings published on Etsy** — 55 cities live with images, tags, and SKUs
 - **Custom map listing live** — `custom_fulfill.py` pipeline built
 - **Date Night listing ready** — layout built, samples rendered, SKUs generated
 - **Renders organized** — completed cities in `etsy/renders/Posted/`, in-progress in `etsy/renders/`

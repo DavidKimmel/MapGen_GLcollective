@@ -41,7 +41,7 @@ from engine.map_engine import (
 from engine.ocean import build_ocean_polygons, refine_ocean_with_harbors
 from engine.pin_renderer import render_pin
 from engine.roads import render_roads
-from engine.text_layout import get_zone_positions, render_bottom_text, render_date_night_text, render_top_label
+from engine.text_layout import get_zone_positions, get_font_preset, render_bottom_text, render_date_night_text, render_top_label
 from export.output_sizes import get_size_config
 from utils.geocoding import extract_city_state, parse_location
 from utils.logging import safe_print
@@ -132,6 +132,7 @@ def render_poster(
     map_only: bool = False,
     layout: str = "default",
     text_line_4: str | None = None,
+    chimney_text: str | None = None,
 ) -> str:
     """Generate a complete map poster.
 
@@ -217,6 +218,14 @@ def render_poster(
             text_line_2 = state_name
 
     zones = get_zone_positions(has_top_label=False, layout=layout)
+
+    # Apply per-preset map height override (e.g., house preset needs more text room)
+    preset_data = get_font_preset(font_preset)
+    if "map_height_override" in preset_data and not map_only:
+        left, map_bottom, width, _ = zones["map"]
+        new_height = preset_data["map_height_override"]
+        new_bottom = preset_data.get("map_bottom_override", map_bottom)
+        zones["map"] = (left, new_bottom, width, new_height)
 
     fig = plt.figure(figsize=(width_in, height_in), facecolor="#FFFFFF")
     if map_only:
@@ -344,7 +353,7 @@ def render_poster(
         apply_heart_crop(ax, fig, bg_color="#FFFFFF", heart_scale=h_scale)
     elif crop == "house":
         safe_print("\nApplying house crop...")
-        apply_house_crop(ax, fig, bg_color="#FFFFFF")
+        apply_house_crop(ax, fig, bg_color="#FFFFFF", chimney_text=chimney_text)
 
     # 7. Place pin
     if pin_lat is not None and pin_lon is not None:
@@ -372,6 +381,7 @@ def render_poster(
                 None, None, theme,
                 scale_factor=scale_factor, font_preset=font_preset,
                 text_line_1=text_line_1, text_line_2=text_line_2, text_line_3=text_line_3,
+                text_line_4=text_line_4,
             )
     else:
         safe_print("\nMap-only mode — skipping text")

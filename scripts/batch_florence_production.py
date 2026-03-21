@@ -18,88 +18,88 @@ import sys
 import time
 
 PYTHON = sys.executable
+# Ensure project root is on path when run as script
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+os.chdir(PROJECT_ROOT)
+
 THEME = "florence"
 SIZES = ["8x10", "11x14", "16x20", "18x24", "24x36"]
 DPI = 300
 RENDERS_DIR = os.path.join("etsy", "renders")
 
+# Cities to skip — open ocean dominates the frame
+SKIP_CITIES: set[str] = {
+    "San Francisco", "San Diego", "Honolulu", "Miami", "Tampa",
+    "Sydney", "Lisbon", "Istanbul", "Copenhagen", "Stockholm",
+    "Los Angeles",
+}
+
 # Florence-specific overrides: tighter extents, better centering.
-# Cities not listed here use default coords from city_list with distance * 0.75.
+# Distances tuned from v11 testing — tighter than 37th_parallel defaults.
 FLORENCE_OVERRIDES: dict[str, dict] = {
     # --- Tier 1 ---
     "New York": {
-        "lat": 40.7580, "lon": -73.9770, "distance": 5500,
+        "lat": 40.7580, "lon": -73.9770, "distance": 5000,
         "display_city": "Manhattan", "display_subtitle": "New York",
         "slug": "manhattan",
     },
     "Chicago": {
-        "lat": 41.8827, "lon": -87.6353, "distance": 7000,
+        "lat": 41.8827, "lon": -87.6353, "distance": 6000,
     },
     "Seattle": {
-        "lat": 47.6135, "lon": -122.3420, "distance": 5500,
+        "lat": 47.6135, "lon": -122.3420, "distance": 5000,
     },
-    "San Francisco": {
-        "lat": 37.7749, "lon": -122.4294, "distance": 5500,
-    },
-    "Washington DC": {"distance": 6500},
-    "New Orleans": {"distance": 6000},
-    "Nashville": {"distance": 6500},
-    "Austin": {"distance": 6500},
-    "Portland": {"distance": 6500},
-    "Denver": {"distance": 6500},
+    "Washington DC": {"distance": 5500},
+    "New Orleans": {"distance": 5000},
+    "Nashville": {"distance": 5500},
+    "Austin": {"distance": 5500},
+    "Portland": {"distance": 4800},
+    "Denver": {"distance": 5000},
     # --- Tier 2 ---
-    "Boston": {"distance": 6000},
-    "Miami": {"distance": 7500},
-    "Atlanta": {"distance": 7500},
-    "Minneapolis": {"distance": 6000},
-    "Pittsburgh": {"distance": 6000},
-    "Savannah": {"distance": 5000},
-    "Charleston": {"distance": 5000},
-    "Asheville": {"distance": 5000},
-    "Salt Lake City": {"distance": 6000},
-    "Honolulu": {"lat": 21.3069, "lon": -157.8583, "distance": 5000},
+    "Boston": {"distance": 5000},
+    "Atlanta": {"distance": 6000},
+    "Minneapolis": {"distance": 5000},
+    "Pittsburgh": {"distance": 5000},
+    "Savannah": {"distance": 4000},
+    "Charleston": {"distance": 4000},
+    "Asheville": {"distance": 4000},
+    "Salt Lake City": {"distance": 5000},
     # --- Tier 3 ---
-    "Richmond": {"distance": 6000},
-    "Chattanooga": {"distance": 5000},
-    "Boise": {"distance": 6000},
-    "Raleigh": {"distance": 6000},
-    "Charlotte": {"distance": 6000},
+    "Richmond": {"distance": 5000},
+    "Chattanooga": {"distance": 4000},
+    "Boise": {"distance": 5000},
+    "Raleigh": {"distance": 5000},
+    "Charlotte": {"distance": 5000},
     # --- Tier 4 (international) ---
-    "London": {"distance": 7500},
-    "Paris": {"distance": 6000},
-    "Tokyo": {"distance": 7500},
-    "Rome": {"distance": 6000},
-    "Barcelona": {"distance": 6000},
-    "Amsterdam": {"distance": 6000},
-    "Lisbon": {"distance": 6000},
-    "Philadelphia": {"distance": 6000},
-    "San Diego": {"distance": 6000},
-    "Baltimore": {"distance": 6000},
+    "London": {"distance": 6000},
+    "Paris": {"distance": 5000},
+    "Tokyo": {"distance": 6000},
+    "Rome": {"distance": 5000},
+    "Barcelona": {"distance": 5000},
+    "Amsterdam": {"distance": 5000},
+    "Philadelphia": {"distance": 5000},
+    "Baltimore": {"distance": 5000},
     # --- Tier 5 (expansion) ---
-    "Los Angeles": {"distance": 9000},
-    "Houston": {"distance": 7500},
-    "San Antonio": {"distance": 6000},
-    "Detroit": {"distance": 6000},
-    "St. Louis": {"distance": 6000},
-    "Cincinnati": {"distance": 5500},
-    "Tampa": {"distance": 7500},
-    "Milwaukee": {"distance": 6000},
-    "Kansas City": {"distance": 6000},
-    "Cleveland": {"distance": 6000},
-    "Berlin": {"distance": 7500},
-    "Dublin": {"distance": 6000},
-    "Edinburgh": {"distance": 5500},
-    "Prague": {"distance": 6000},
-    "Vienna": {"distance": 7500},
-    "Copenhagen": {"distance": 6000},
-    "Istanbul": {"distance": 9000},
-    "Sydney": {"distance": 7500},
-    "Florence": {"distance": 4500},
-    "Stockholm": {"distance": 6000},
+    "Houston": {"distance": 6000},
+    "San Antonio": {"distance": 5000},
+    "Detroit": {"distance": 5000},
+    "St. Louis": {"distance": 5000},
+    "Cincinnati": {"distance": 4500},
+    "Milwaukee": {"distance": 5000},
+    "Kansas City": {"distance": 5000},
+    "Cleveland": {"distance": 5000},
+    "Berlin": {"distance": 6000},
+    "Dublin": {"distance": 5000},
+    "Edinburgh": {"distance": 4500},
+    "Prague": {"distance": 5000},
+    "Vienna": {"distance": 6000},
+    "Florence": {"distance": 3500},
 }
 
 # Default distance multiplier for cities without explicit overrides
-DEFAULT_DISTANCE_SCALE = 0.75
+DEFAULT_DISTANCE_SCALE = 0.65
 
 
 def render_city_subprocess(city_name: str, force: bool = False) -> tuple[int, float]:
@@ -111,10 +111,9 @@ def render_city_subprocess(city_name: str, force: bool = False) -> tuple[int, fl
 import gc, sys, os, time
 sys.path.insert(0, os.getcwd())
 
-from engine.florence_renderer import render_florence_poster
+from engine.florence_renderer import render_florence_all_sizes
 from engine.renderer import load_theme
 from etsy.city_list import get_city, ALL_CITIES
-from export.output_sizes import get_size_config
 
 city_name = {json.dumps(city_name)}
 theme_name = {json.dumps(THEME)}
@@ -149,44 +148,27 @@ city_dir = os.path.join(renders_dir, slug + "_florence")
 os.makedirs(city_dir, exist_ok=True)
 
 print(f"  {{display_city}} ({{display_subtitle}})")
-print(f"  Center: {{lat}}, {{lon}} | Base distance: {{base_distance}}m | Slug: {{slug}}")
+print(f"  Center: {{lat}}, {{lon}} | Distance: {{base_distance}}m | Slug: {{slug}}")
 
 theme_data = load_theme(theme_name)
 
-for size in sizes:
-    output_path = os.path.join(city_dir, f"{{slug}}_{{size}}.png")
-    if os.path.exists(output_path) and not force:
-        print(f"  {{size}} — SKIPPED (exists)")
-        continue
+# Single master render, crop to all sizes — consistent colors
+render_florence_all_sizes(
+    location=f"{{lat}},{{lon}}",
+    theme_data=theme_data,
+    sizes=sizes,
+    dpi=dpi,
+    output_dir=city_dir,
+    distance=base_distance,
+    city_name=display_city,
+    state_name=display_subtitle,
+    city_slug=slug,
+    force=force,
+)
 
-    # Scale distance per size (smaller prints = tighter crop)
-    size_config = get_size_config(size)
-    size_distance = base_distance
-    # Keep consistent distance across sizes for Florence (mosaic looks best consistent)
-
-    print(f"  {{size}} — rendering (distance={{size_distance}}m)...")
-    t0 = time.time()
-    try:
-        result = render_florence_poster(
-            location=f"{{lat}},{{lon}}",
-            theme_data=theme_data,
-            size=size,
-            dpi=dpi,
-            distance=size_distance,
-            output_path=output_path,
-            city_name=display_city,
-            state_name=display_subtitle,
-        )
-        elapsed = time.time() - t0
-        size_mb = os.path.getsize(result) / 1e6
-        print(f"  {{size}} — OK ({{elapsed:.0f}}s, {{size_mb:.1f}} MB)")
-    except Exception as e:
-        print(f"  {{size}} — ERROR: {{e}}")
-
-    # Memory cleanup between sizes
-    import matplotlib.pyplot as plt
-    plt.close("all")
-    gc.collect()
+import matplotlib.pyplot as plt
+plt.close("all")
+gc.collect()
 
 print("\\n__CITY_DONE__")
 """
@@ -203,11 +185,13 @@ print("\\n__CITY_DONE__")
 
 
 def get_cities(tier: int | None = None) -> list:
-    """Get cities from city_list, optionally filtered by tier."""
+    """Get cities from city_list, excluding ocean cities."""
     from etsy.city_list import ALL_CITIES, get_cities_by_tier
     if tier is not None:
-        return get_cities_by_tier(tier)
-    return list(ALL_CITIES)
+        cities = get_cities_by_tier(tier)
+    else:
+        cities = list(ALL_CITIES)
+    return [c for c in cities if c.city not in SKIP_CITIES]
 
 
 def main():

@@ -101,6 +101,33 @@ FONT_PRESETS = {
         "line2_uppercase": False,
         "line2_letterspaced": False,
     },
+    6: {
+        "name": "house",
+        "description": "House map — High Tower title + Priestacy script names + High Tower address",
+        "city":     ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "subtitle": ("Priestacy.otf", "cursive", "normal", "normal"),
+        "label":    ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "body":     ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "body_italic": ("HighTowerText-Italic.ttf", "serif", "normal", "italic"),
+        "coords":   ("HighTowerText-Regular.ttf", "serif", "normal", "normal"),
+        "city_uppercase": True,
+        "city_letterspaced": True,
+        "line2_uppercase": False,
+        "line2_letterspaced": False,
+        "line2_font_role": "subtitle",
+        "line2_size_scale": 2.8,
+        "line3_uppercase": False,
+        "line3_letterspaced": False,
+        "line_positions": {
+            "line_1_y": 0.200,
+            "line_2_y": 0.129,
+            "line_3_y": 0.058,
+            "line_4_y": 0.042,
+        },
+        "map_height_override": 0.70,
+        "map_bottom_override": 0.22,
+        "use_4_lines": True,
+    },
 }
 
 
@@ -205,8 +232,9 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
                        font_preset: int = 1,
                        text_line_1: str | None = None,
                        text_line_2: str | None = None,
-                       text_line_3: str | None = None) -> None:
-    """Render the bottom text zone with 3 lines.
+                       text_line_3: str | None = None,
+                       text_line_4: str | None = None) -> None:
+    """Render the bottom text zone with 3-4 lines.
 
     New 3-line API (preferred):
         text_line_1: Large title (e.g., "Our First Home")
@@ -219,6 +247,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
     preset = get_font_preset(font_preset)
     zones = get_zone_positions(has_top_label=False)
     bottom = zones["bottom_zone"]
+    if "line_positions" in preset:
+        bottom = {**bottom, **preset["line_positions"]}
 
     text_primary = "#1A1A1A"
     text_secondary = "#1A1A1A"
@@ -256,7 +286,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         )
 
     # --- Line 2 (medium subtitle) ---
-    line2_size = 20 * scale_factor
+    line2_scale = preset.get("line2_size_scale", 1.0)
+    line2_size = 20 * scale_factor * line2_scale
     if line2:
         display_line2 = line2
         if preset.get("line2_uppercase"):
@@ -264,7 +295,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         if preset.get("line2_letterspaced") and is_latin_script(line2):
             display_line2 = WIDE_SPACE.join(list(display_line2))
 
-        font_line2 = _get_font(preset, "body", line2_size)
+        line2_role = preset.get("line2_font_role", "body")
+        font_line2 = _get_font(preset, line2_role, line2_size)
         fig.text(
             0.5, bottom["line_2_y"] - descender_offset,
             display_line2,
@@ -289,6 +321,18 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
             color=text_secondary,
             ha="center", va="center",
             fontproperties=font_line3,
+        )
+
+    # --- Line 4 (optional, for presets with use_4_lines) ---
+    if text_line_4 and "line_4_y" in bottom:
+        line4_size = 20 * scale_factor
+        font_line4 = _get_font(preset, "body", line4_size)
+        fig.text(
+            0.5, bottom["line_4_y"],
+            text_line_4,
+            color=text_secondary,
+            ha="center", va="center",
+            fontproperties=font_line4,
         )
 
 
