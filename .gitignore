@@ -48,3 +48,4 @@ env
 
 # Generated assets
 etsy/style_sheet.png
+etsy/.playwright_profile/
