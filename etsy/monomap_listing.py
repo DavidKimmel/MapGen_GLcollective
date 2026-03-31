@@ -125,14 +125,7 @@ Each city block is individually colored in a single bold tone with crisp \
 white streets revealing every road, path, and alley. The result is a \
 stunning mosaic that's unique to {display_city}'s street grid.
 ———————————————————————
-🔸 HOW TO ORDER 🔸
-———————————————————————
-In the personalization box, please include:
-1. Your color choice (see options below)
-2. Any special requests (custom text, etc.)
-✉️ A digital preview will be sent for your approval before anything is printed or finalized.
-———————————————————————
-🎨 CHOOSE YOUR COLOR
+🎨 6 COLOR OPTIONS — CHOOSE YOUR FAVORITE 🎨
 ———————————————————————
 ◈ Charcoal — classic medium grey
 ◈ Navy — deep sophisticated blue
@@ -141,7 +134,8 @@ In the personalization box, please include:
 ◈ Dusty Rose — elegant mauve pink
 ◈ Black — bold near-black
 
-See listing photos for color reference!
+See listing photo #2 for all colors side by side!
+Simply select your color in the personalization box at checkout.
 ———————————————————————
 🖼️ PRODUCT OPTIONS
 ———————————————————————
