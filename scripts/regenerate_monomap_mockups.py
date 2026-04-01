@@ -207,29 +207,57 @@ def regenerate_city(city: CityListing, dry_run: bool = False) -> bool:
         print(f"  Missing renders for {slug} (hero={hero_color})")
         return False
 
-    print(f"  Hero: {hero_color_actual} | 24x36: {hero_24.name} | 18x24: {hero_18.name}")
-
     if dry_run:
+        print(f"  Hero: {hero_color_actual}")
         return True
 
-    # Load hero renders
-    hero_24_img = Image.open(str(hero_24)).convert("RGBA")
-    hero_18_img = Image.open(str(hero_18)).convert("RGBA")
+    # Load ALL 3 color renders for this city (for single-frame variety)
+    color_renders: dict[str, dict[str, Image.Image]] = {}
+    for color in ["navy", "terracotta", "forest"]:
+        r24 = find_mono_render(slug, color, "24x36")
+        r18 = find_mono_render(slug, color, "18x24")
+        if r24 and r18:
+            color_renders[color] = {
+                "24x36": Image.open(str(r24)).convert("RGBA"),
+                "18x24": Image.open(str(r18)).convert("RGBA"),
+            }
+    available_colors = list(color_renders.keys())
+    print(f"  Colors loaded: {available_colors}")
 
-    # Get fillers in different colors
+    if not available_colors:
+        print(f"  No color renders found for {slug}")
+        return False
+
+    # Get fillers for multi-frame mockups
     fillers_24 = get_fillers(slug, hero_color_actual, "24x36", 3)
     fillers_18 = get_fillers(slug, hero_color_actual, "18x24", 3)
-
     filler_24_imgs = [Image.open(str(p)).convert("RGBA") for _, p in fillers_24]
     filler_18_imgs = [Image.open(str(p)).convert("RGBA") for _, p in fillers_18]
 
-    print(f"  Fillers 24x36: {[(s, p.name) for s, p in fillers_24]}")
-
-    # Generate all mockups (flat + lifestyle)
+    # Separate single-frame vs multi-frame mockups
     all_mockups = ALL_MOCKUPS + LIFESTYLE_MOCKUPS + EXTENDED_LIFESTYLE_MOCKUPS
+    single_frame = [m for m in all_mockups if len(m.slots) <= 1 and m.featured_slot == 0
+                    and m.short_name not in ("2frames", "cls4", "framepsd")]
+    multi_frame = [m for m in all_mockups if m not in single_frame]
+
     generated = 0
 
-    for mockup_def in all_mockups:
+    # Single-frame mockups: CYCLE through colors so each shows a different one
+    for i, mockup_def in enumerate(single_frame):
+        color = available_colors[i % len(available_colors)]
+        size_key = mockup_def.render_size if mockup_def.render_size in ("24x36", "18x24") else "24x36"
+        hero_img = color_renders[color].get(size_key, color_renders[color]["24x36"])
+
+        out_path = out_dir / f"{slug}_{mockup_def.short_name}.jpg"
+        ok = compose_mockup(mockup_def, hero_img, [], out_path)
+        if ok:
+            generated += 1
+
+    # Multi-frame mockups: use hero color for featured slot, fillers for others
+    hero_24_img = color_renders.get(hero_color_actual, color_renders[available_colors[0]])["24x36"]
+    hero_18_img = color_renders.get(hero_color_actual, color_renders[available_colors[0]])["18x24"]
+
+    for mockup_def in multi_frame:
         if mockup_def.render_size == "18x24":
             hero_img = hero_18_img
             filler_imgs = filler_18_imgs
@@ -242,7 +270,7 @@ def regenerate_city(city: CityListing, dry_run: bool = False) -> bool:
         if ok:
             generated += 1
 
-    print(f"  Generated {generated} mockups")
+    print(f"  Generated {generated} mockups ({len(single_frame)} single, {len(multi_frame)} multi)")
     return True
 
 

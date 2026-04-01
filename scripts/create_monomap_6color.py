@@ -94,7 +94,7 @@ def find_render(city_slug: str, color: str, size: str = "18x24") -> Path | None:
 
 
 def fit_to_slot(render: Image.Image, slot: tuple[int, int, int, int]) -> Image.Image:
-    """Fit render to slot preserving aspect ratio, white fill."""
+    """Fit render to slot preserving aspect ratio, white fill for gaps."""
     l, t, r, b = slot
     sw, sh = r - l, b - t
     rw, rh = render.size
@@ -137,52 +137,8 @@ def create_6color_showcase(output_path: str, title: str = "Choose Your Color") -
         l, t, r, b = slot
         base.paste(fitted, (l, t), fitted)
 
-    # Convert to RGB for drawing
+    # No labels — just the maps in frames
     result = base.convert("RGB")
-    draw = ImageDraw.Draw(result)
-
-    # Title across top
-    title_font = _load_font("Montserrat-Bold.ttf", 90)
-    title_bbox = draw.textbbox((0, 0), title, font=title_font)
-    title_w = title_bbox[2] - title_bbox[0]
-    canvas_w = result.width
-    # Draw title centered, just above the bottom gap between rows
-    # Actually put it at the very top of the image
-    # But the frames start at y=250, so not much room. Put between rows instead.
-    # Gap between rows: y=1735 to y=1816 — only 81px, too tight.
-    # Put labels BELOW each frame instead.
-
-    # Color labels below each frame
-    label_font = _load_font("Montserrat-Bold.ttf", 72)
-
-    for i, ((_city, _color), (color_key, color_display), slot) in enumerate(
-        zip(SHOWCASE_CITIES, COLORS, SLOTS)
-    ):
-        l, t, r, b = slot
-        slot_center_x = (l + r) // 2
-
-        lbbox = draw.textbbox((0, 0), color_display, font=label_font)
-        lw = lbbox[2] - lbbox[0]
-        lh = lbbox[3] - lbbox[1]
-
-        # Position label just below the frame bottom
-        label_x = slot_center_x - lw // 2
-        if i < 3:
-            # Top row — label between rows
-            label_y = b + 15
-        else:
-            # Bottom row — label below frames
-            label_y = b + 15
-
-        # Semi-transparent dark background for readability
-        pad_x, pad_y = 20, 8
-        draw.rounded_rectangle(
-            [label_x - pad_x, label_y - pad_y,
-             label_x + lw + pad_x, label_y + lh + pad_y],
-            radius=10,
-            fill=(30, 30, 30, 220),
-        )
-        draw.text((label_x, label_y), color_display, font=label_font, fill=(255, 255, 255))
 
     # Save
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
