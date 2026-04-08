@@ -20,7 +20,7 @@ _logger = logging.getLogger("mapgen")
 
 _UTILS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(_UTILS_DIR)
-_DEFAULT_CACHE = os.path.join(_PROJECT_DIR, "cache")
+_DEFAULT_CACHE = r"H:\MapGen_cache"
 CACHE_DIR_PATH = os.environ.get("MAPGEN_CACHE_DIR", _DEFAULT_CACHE)
 CACHE_DIR = Path(CACHE_DIR_PATH)
 CACHE_DIR.mkdir(exist_ok=True)

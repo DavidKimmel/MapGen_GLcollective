@@ -19,6 +19,7 @@ import osmnx as ox
 from shapely.ops import unary_union
 
 from engine.crop_masks import apply_circle_crop, apply_house_crop, apply_heart_crop
+from engine.county_mask import apply_county_crop
 from engine.map_engine import (
     REFERENCE_DIST,
     fetch_all_osm_data,
@@ -133,6 +134,11 @@ def render_poster(
     layout: str = "default",
     text_line_4: str | None = None,
     chimney_text: str | None = None,
+    county_name: str | None = None,
+    county_state: str | None = None,
+    min_zoom_scale: float | None = None,
+    skip_buildings: bool = False,
+    road_min_tier: str | None = None,
 ) -> str:
     """Generate a complete map poster.
 
@@ -190,8 +196,10 @@ def render_poster(
     point = (lat, lon)
 
     city_name, state_name = extract_city_state(geocode_result)
-    if city_name is None:
-        city_name = location.split(",")[0].strip()
+    # Use the original location input if geocoded name is missing or non-Latin
+    input_city = location.split(",")[0].strip()
+    if city_name is None or not all(c.isascii() for c in city_name):
+        city_name = input_city
 
     safe_print(f"  Location: {city_name} ({lat:.4f}, {lon:.4f})")
 
@@ -216,6 +224,7 @@ def render_poster(
         text_line_1 = city_name
         if state_name:
             text_line_2 = state_name
+        text_line_3 = f"{abs(lat):.4f}\u00b0 {'N' if lat >= 0 else 'S'}  {abs(lon):.4f}\u00b0 {'W' if lon < 0 else 'E'}"
 
     zones = get_zone_positions(has_top_label=False, layout=layout)
 
@@ -267,7 +276,11 @@ def render_poster(
     ref_diag = (16**2 + 20**2) ** 0.5
     cur_diag = (width_in**2 + height_in**2) ** 0.5
     fig_scale = cur_diag / ref_diag
-    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / distance)) * fig_scale
+    if min_zoom_scale is not None:
+        # County-scale: override zoom to ensure roads are visible
+        zoom_scale = min_zoom_scale
+    else:
+        zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / distance)) * fig_scale
     compensated_dist = osm_data["compensated_dist"]
 
     # Ocean (only when theme opts in via "ocean": true)
@@ -289,6 +302,10 @@ def render_poster(
             ocean_union = unary_union(ocean_polys)
         except Exception:
             pass
+
+    # County crops: render fill layers (residential, natural, landuse) but
+    # skip buildings (invisible at county scale, cause MemoryError).
+    is_county = crop == "county"
 
     # Residential landuse (z=0.35, below natural areas)
     if detail_layers:
@@ -321,13 +338,17 @@ def render_poster(
     # Parks (always)
     render_parks(ax, osm_data["parks"], target_crs, theme_data)
 
-    # Buildings (detail only)
-    if detail_layers:
+    # Buildings — skip for county crops and when explicitly disabled
+    if detail_layers and not is_county and not skip_buildings:
         render_buildings(ax, osm_data["buildings"], target_crs, theme_data)
 
-    # Roads (always)
+    # Roads — explicit tier filter, or tertiary+ default for county crops
     gdf_edges_full = ox.graph_to_gdfs(g_proj, nodes=False)
-    render_roads(ax, gdf_edges_full, theme_data, distance, fig_scale=fig_scale)
+    effective_min_tier = road_min_tier if road_min_tier is not None else ("tertiary" if is_county else None)
+    road_zoom = min_zoom_scale if min_zoom_scale is not None else None
+    render_roads(ax, gdf_edges_full, theme_data, distance,
+                 fig_scale=fig_scale, min_tier=effective_min_tier,
+                 zoom_override=road_zoom)
 
     # Railways (detail only)
     if detail_layers:
@@ -354,6 +375,10 @@ def render_poster(
     elif crop == "house":
         safe_print("\nApplying house crop...")
         apply_house_crop(ax, fig, bg_color="#FFFFFF", chimney_text=chimney_text)
+    elif crop == "county" and county_name and county_state:
+        safe_print(f"\nApplying county crop ({county_name}, {county_state})...")
+        apply_county_crop(ax, fig, county_name, county_state,
+                          target_crs, bg_color="#FFFFFF")
 
     # 7. Place pin
     if pin_lat is not None and pin_lon is not None:

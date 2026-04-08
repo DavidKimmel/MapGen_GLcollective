@@ -49,3 +49,9 @@ env
 # Generated assets
 etsy/style_sheet.png
 etsy/.playwright_profile/
+
+# Worktrees
+.claude/worktrees/
+
+# County data (large shapefiles)
+data/counties/

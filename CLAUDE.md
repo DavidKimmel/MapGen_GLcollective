@@ -4,17 +4,27 @@ Minimalist city map art prints sold on Etsy. Digital downloads + physical prints
 
 ## Products
 
-1. **Pre-made city maps** — 55 cities across 5 tiers, 20 variants each (5 digital + 5 unframed + 5 framed black + 5 framed white)
-2. **Custom map listing** — any location, full/circle crop, 10 SKUs (5 digital + 5 unframed)
-3. **Date Night heart map** — heart crop with names above, date_night layout, 10 SKUs (5 digital + 5 unframed)
+1. **Pre-made Classic city maps** — 55 cities, 20 variants each (5 digital + 5 unframed + 5 framed B + 5 framed W)
+2. **Pre-made Florence city maps** — 39 cities, same variant structure
+3. **Pre-made Blueprint city maps** — 56 cities, 20 variants, 4 color options (custom-map tag)
+4. **Pre-made MonoMap city maps** — 59 cities, 20 variants, 6 color options (custom-map tag, placeholder workflow)
+5. **Custom map listing** — any location, full/circle crop, 10 SKUs (5 digital + 5 unframed)
+6. **Custom House Map** — house crop, "Our First Home" layout, 20 SKUs
+7. **Custom MonoMap** — flat single-color, 6 color options, 15 physical SKUs (custom-map tag)
+8. **Date Night heart map** — heart crop with names above, date_night layout, 10 SKUs
+9. **CustomMapPack** — 8 additional custom listings (4 styles × digital + print)
+10. **Custom 3-Map Set** — any cities, 12 style options, 1-6 maps, unframed prints (custom-map tag, placeholder workflow)
+11. **CountyMap Digital** — U.S. county-shaped maps, 12 themes, 18 sizes, ghost background, PIL text. Etsy listing 4484494627. Render on order.
+12. **CountyMap Print** — same, 12 themes × 8 sizes ($22.51-$49.73). Etsy listing 4484494881. Files in `etsy/renders/POSTED/CountyMap_Posted/`
 
 ## Current Status
 
-- **55 cities rendered** — all have 5 sizes at 300 DPI + detail crops + size comparisons + mockups
-- **All city listings published on Etsy** — 55 cities live with images, tags, and SKUs
-- **Custom map listing live** — `custom_fulfill.py` pipeline built
-- **Date Night listing ready** — layout built, samples rendered, SKUs generated
-- **Renders organized** — completed cities in `etsy/renders/Posted/`, in-progress in `etsy/renders/`
+- **212+ Etsy listings** — 55 Classic + 39 Florence + 56 Blueprint + 59 MonoMap + custom listings + 3-Map + 2 CountyMap drafts
+- **Universal batch pipeline** built — `scripts/batch_universal.py` renders any city × style end-to-end
+- **Gelato connected** — all physical variants linked for Classic, Florence, Blueprint, MonoMap
+- **Custom fulfillment** — `custom_fulfill.py` for made-to-order (MonoMap, Blueprint color choices)
+- **Competitive research** done — see `GROWTH_PLAN.md` (target: 500+ listings)
+- **Style workflow documented** — see `docs/STYLE_WORKFLOW.md` for complete production guide
 - **Pricing matched** to 37thParallelDesigns competitor, saved in `etsy/renders/pricing_matrix.txt`
 
 ## Project Structure
@@ -25,14 +35,18 @@ Mapgen_GLcollective/
 ├── app.py                    # Flask web app entry point
 ├── CLAUDE.md                 # This file — project documentation
 │
-├── engine/                   # Map rendering pipeline (7 files, ~2400 lines)
+├── engine/                   # Map rendering pipeline
 │   ├── renderer.py           # Main orchestrator — calls all layers in order
 │   ├── map_engine.py         # Fetches 14 OSM data layers, renders geometries
 │   ├── roads.py              # Road hierarchy, widths, colors (7 tiers)
 │   ├── ocean.py              # Ocean fill from land polygon subtraction
 │   ├── text_layout.py        # Text zones: default (3 lines below) + date_night (above/below)
 │   ├── crop_masks.py         # Shape masks: circle, heart, house
-│   └── pin_renderer.py       # 5 pin styles from SVG paths (heart, pin, house, grad cap)
+│   ├── pin_renderer.py       # 5 pin styles from SVG paths (heart, pin, house, grad cap)
+│   ├── florence_renderer.py  # Florence mosaic renderer (polygonize + random palette)
+│   ├── florence_text_layout.py  # Florence/MonoMap poster compositor (bottom text + swatch bar)
+│   ├── blueprint_renderer.py # Blueprint shaded mosaic renderer + v3c layout compositor
+│   └── nordic_renderer.py    # Nordic monochrome street renderer
 │
 ├── etsy/                     # Etsy listing & fulfillment pipeline
 │   ├── city_list.py          # 35 cities (4 tiers) with CityListing dataclass
@@ -50,17 +64,35 @@ Mapgen_GLcollective/
 │   └── publish_batch.py      # Batch listing publisher
 │
 ├── etsy/renders/             # Output directory (gitignored)
-│   ├── Posted/               # Completed cities (moved after listing goes live)
-│   ├── {city_slug}/          # Per-city: 5 PNGs + detail crop + size comparison + mockups
-│   ├── CustomMap1/           # Custom map test outputs
-│   └── DateMap/              # Date Night heart map samples + SKUs
+│   ├── DefaultMap_Posted/    # Classic (37th_parallel) — 55 cities, all sizes + mockups
+│   ├── FlorenceMap_Posted/   # Florence — 39 cities, all sizes + mockups
+│   ├── MonoMap/{color}/      # MonoMap color samples — 6 colors × 5 cities
+│   ├── POSTED/MonoMap_Posted/ # MonoMap — 59 cities, all sizes + 13 mockups + listing.txt
+│   ├── BlueprintV3/          # Blueprint v3c layout — correct/current renders
+│   ├── GradientMap/          # Blueprint OLD renders (fading bar — don't use for mockups)
+│   ├── CustomMapPack/        # 8 listing folders with all images + listing.txt
+│   ├── CustomMap_Posted/     # Custom order fulfilled renders
+│   ├── CustomHouse/          # House map test outputs
+│   └── {city_slug}/          # In-progress city renders
 │
 ├── scripts/                  # Batch utility scripts
-│   ├── batch_seo_render.py   # Render cities in subprocess (memory-safe)
+│   ├── batch_seo_render.py   # Render Classic cities in subprocess (memory-safe)
+│   ├── batch_florence_production.py  # Render Florence cities (master crop approach)
+│   ├── batch_mono_samples.py # Render MonoMap samples (6 colors × 5 cities)
+│   ├── batch_gradient_samples.py  # Render Blueprint raw maps (OLD compositor)
 │   ├── batch_dropbox_upload.py  # Upload renders to Dropbox
-│   ├── batch_render.py       # Legacy CSV-based batch renderer
-│   ├── generate_samples.py   # 8 diverse sample renders for mockups
-│   └── sample_sheet.py       # Sample sheet image generator
+│   ├── batch_full_pipeline.py   # Full pipeline: render + mockups + listing text
+│   ├── create_custom_pack_listings.py  # CustomMapPack: hero, detail, swatches
+│   ├── create_custom_pack_mockups.py   # CustomMapPack: 7 mockups per style
+│   ├── render_custom_pack_assets.py    # CustomMapPack: render maps at 18x24/24x36
+│   ├── create_color_swatches.py        # Color swatch grid images
+│   ├── publish_monomap_drafts.py       # MonoMap: push drafts with 13 images + hero rotation
+│   ├── push_monomap_variants.py        # MonoMap: push 20 SKU variants per listing
+│   ├── generate_monomap_gelato_csvs.py # MonoMap: Gelato CSVs with placeholder URL
+│   ├── connect_monomap_gelato.py       # MonoMap: connect variants to Gelato via API
+│   ├── render_missing_color_mockups.py # MonoMap: render + compose color-specific mockups
+│   ├── compose_and_upload_color_mockups.py # MonoMap: compose + upload color mockups to Etsy
+│   └── batch_monomap_colors.py         # MonoMap: render extra colors (5 beyond navy default)
 │
 ├── api/                      # Flask API backend
 │   ├── routes.py             # Endpoints: geocode, themes, generate, download
@@ -82,16 +114,21 @@ Mapgen_GLcollective/
 ├── themes/                   # 23 color theme JSON files
 ├── fonts/                    # 25 TTF/OTF font files (6 MB)
 ├── templates/                # PSD template generator + output (16x20 for full/heart/circle/house)
-├── data/                     # Land polygon shapefiles for ocean rendering (gitignored, ~1.3 GB)
+├── data/                     # Land polygon shapefiles + TIGER/Line county boundaries
+│   └── counties/             # cb_2023_us_county_500k.shp (3,235 U.S. counties)
 ├── posters/                  # Test render output (gitignored)
-└── cache/                    # OSM data cache (gitignored, populated at runtime)
+└── H:\MapGen_cache\          # OSM data cache (moved from C: to H: drive, ~267 GB)
 ```
 
 ## Key Commands
 
 ```bash
-# Render a single poster
+# Render a single city poster
 python cli.py --location "New York" --theme 37th_parallel --size 16x20
+
+# Render a county map (any of 3,235 U.S. counties, 12 themes, 18 sizes)
+python scripts/generate_county_final.py --county "Carroll" --state "MD" --theme dark_teal
+python scripts/generate_county_final.py --county "Union" --state "NJ" --theme nordic_complex --size A3 --dpi 300
 
 # Render a date night heart map
 python cli.py --location "Portland" --layout date_night --crop heart \
@@ -150,18 +187,85 @@ python -m etsy.generate_gelato_csvs --city city_slug --token TOKEN
 python -m etsy.gelato_connect --city "City Name"
 ```
 
+## MonoMap Workflow (End-to-End)
+
+```bash
+# 1. Render all 6 colors at mockup sizes
+python scripts/batch_monomap_colors.py --city city_slug
+
+# 2. Generate color-specific mockups (black/charcoal/dusty_rose)
+python scripts/render_missing_color_mockups.py --city city_slug
+
+# 3. Generate listing text
+python -m etsy.monomap_listing --city city_slug
+
+# 4. Push draft to Etsy (with 10 images + hero rotation)
+python scripts/publish_monomap_drafts.py --city city_slug
+
+# 5. Push 20 variants (digital + unframed + framed B/W × 5 sizes)
+python scripts/push_monomap_variants.py --city city_slug
+
+# 6. Upload 3 color mockups (brings to 13 images)
+python scripts/compose_and_upload_color_mockups.py --city city_slug
+
+# 7. Generate Gelato CSV
+python scripts/generate_monomap_gelato_csvs.py --city city_slug
+
+# 8. Sync in Gelato dashboard, then connect
+python scripts/connect_monomap_gelato.py --city city_slug
+
+# 9. Publish (activate via Etsy dashboard or API)
+```
+
+## Custom 3-Map Listing
+
+12 color/style themes stored in `themes/custom_3map/`:
+1. Classic (37th_parallel), 2. Dark Teal, 3. Midnight Blue, 4. Noir, 5. Vintage, 6. Sage Atlas
+7. Sunset, 8. Sky Blue, 9. Rose Blush, 10. Teal Coral, 11. Minimalist, 12. Nordic Complex
+
+**Variant structure:** Axis 1 = Size (5), Axis 2 = Quantity (1-6 maps) = 30 variants, unframed only
+**Pricing:** Matches Mapologist competitor ($27 for 1 map 8x10, $72 for 3 at 8x10)
+**Personalization:** Required — buyer provides city names + style numbers
+**Listing ID:** 4482153934 (draft)
+**Assets folder:** `etsy/renders/3MAPTEST/`
+**"Choose a style" mockup layout:** See memory `reference_6up_chooser_layout.md` for exact parameters
+
+```bash
+# Render a city in any of the 12 custom styles
+python cli.py --location "City" --theme theme_name --size 24x36
+
+# Themes: 37th_parallel, dark_teal, midnight_blue, noir, vintage, sage_atlas,
+#          sunset, sky_blue, rose_blush, teal_coral, minimalist, nordic_complex
+```
+
 ## Rendering
 
-- All maps render from OpenStreetMap data at 300 DPI via matplotlib
+- All maps render from OpenStreetMap data via matplotlib
 - 5 poster sizes: 8x10, 11x14, 16x20, 18x24, 24x36
-- Primary theme: `37th_parallel` (black roads on white, blue water, green parks)
-- fig_scale ensures consistent linewidths across all sizes (reference: 16x20 diagonal)
-- zoom_scale adapts road widths for different map distances
 - **Ocean rendering** requires land polygon data in `data/` — downloaded from osmdata.openstreetmap.de
 - **Layouts:** `default` (3 text lines below map) or `date_night` (names above heart, 3 lines below)
 - **Crop shapes:** full, circle, heart, house
 - **5 font presets:** Century Gothic (sans), High Tower Text (serif), Priestacy (script), Monotype Corsiva (cursive), Footlight MT Light (classic)
 - **5 pin styles:** heart, heart-pin, classic, house, graduation cap
+
+### Map Styles
+
+| Style | Renderer | Layout | Fonts |
+|-------|----------|--------|-------|
+| Classic (37th_parallel) | `engine/renderer.py` | Bottom text (centered, 3 lines) | Century Gothic Bold (caps) |
+| Florence | `engine/florence_renderer.py` + `florence_text_layout.py` | Bottom swatch bar + text (right-aligned) | Switzer Bold |
+| MonoMap | Florence renderer with single-color palette | Same as Florence, white bg | Switzer Bold |
+| Blueprint | `engine/blueprint_renderer.py` | **Top** title + blocky swatch bar + map below | Montserrat Bold + Roboto Regular |
+
+### Blueprint Renderer Details
+
+- **Module:** `engine/blueprint_renderer.py` (consolidated from test scripts)
+- **Visual:** 8 shades of one hue for city blocks, all roads as white overlay, white water
+- **Layout (v3c):** Title top-right (Montserrat Bold, lowercase) → state below → blocky swatch bar with coords in leftmost block (Roboto Regular) → map
+- **Palettes:** navy, forest, terracotta, charcoal
+- **Key functions:** `render_shaded_map()`, `compose_blueprint_poster(strip_header=True)`, `render_blueprint()`
+- **Auto-extent:** `detect_extent()` probes city density to size map (2500m–4000m)
+- **⚠️ Old renders in `GradientMap/`** use fading bar layout — always use `BlueprintV3/` for current v3c layout
 
 ## Etsy & Fulfillment
 
@@ -200,6 +304,29 @@ python -m etsy.gelato_connect --city "City Name"
 ### Date Night Pricing (GLC-DATE-* SKUs)
 Same as custom map pricing. 10 variants: 5 digital + 5 unframed.
 
+## CustomMapPack Listings
+
+8 listings (4 styles × digital + print) in `etsy/renders/CustomMapPack/`.
+
+Each folder (`{style}_digital/`, `{style}_print/`) contains:
+- `listing.txt` — Etsy listing copy (title, tags, description, pricing)
+- `hero_your_city.png` — hero image with "YOUR CITY" text
+- 7 mockup JPGs — Main, Mockup4, ONCE, VV1, 2Frames, CLS-4, FramePSD
+- `detail_crop.jpg` — close-up map detail
+- `color_options.jpg` — labeled color swatches (Blueprint + MonoMap only)
+- Print and digital share identical images
+
+```bash
+# Regenerate hero images, detail crops, color swatches
+python scripts/create_custom_pack_listings.py
+
+# Regenerate mockups (multi-color for Blueprint/MonoMap)
+python scripts/create_custom_pack_mockups.py
+
+# Render map images at 18x24/24x36 for mockups
+python scripts/render_custom_pack_assets.py
+```
+
 ## Cities (55 total, 5 tiers)
 
 **Tier 1 (10):** Chicago, New York, Washington DC, New Orleans, Nashville, Austin, Seattle, San Francisco, Portland, Denver
@@ -212,11 +339,16 @@ Same as custom map pricing. 10 variants: 5 digital + 5 unframed.
 
 - **7 PSD templates** in `etsy/TUR2/Best/Flat/` — Main, Mockup4, ONCE, VV1, 2Frames, CLS-4, FramePSD
 - **Render size mapping:** Most use 24x36, ONCE + VV1 use 18x24
-- **Multi-frame mockups** use filler cities (Pittsburgh, New Orleans, Washington DC, Amsterdam)
-- **Filler lookup** searches both `renders/` and `renders/Posted/`
+- **City mockups:** `etsy/mockup_composer.py` — filler cities: Pittsburgh, New Orleans, Washington DC, Amsterdam
+- **CustomMapPack mockups:** `scripts/create_custom_pack_mockups.py` — multi-color fillers for Blueprint/MonoMap
+- **Filler lookup** searches `renders/DefaultMap_Posted/`, `renders/FlorenceMap_Posted/`, `renders/BlueprintV3/`, `renders/MonoMap/`
 
 ## Important Constraints & Patterns
 
+- **Geocoding uses `language="en"`** — Nominatim returns English names; "Greater " prefix stripped automatically; non-ASCII names fall back to input string
+- **Road rendering uses round caps/joins** — `capstyle="round", joinstyle="round"` in `engine/roads.py` for smooth intersections
+- **Highway widths reduced** (2026-04-01) — motorway 0.8 (was 1.2), trunk 0.7 (was 1.0), primary 0.6 (was 0.8) for cleaner look
+- **Coordinates on line 3** — renderer auto-adds GPS coords below state/country on all default renders
 - **Etsy title must match exactly** in Gelato CSV/API — mismatches cause "Product not found"
 - **Dropbox tokens are short-lived** (~4 hours) — shared links persist permanently
 - **Digital variants** always show "not connected" in Gelato — this is expected
@@ -224,7 +356,22 @@ Same as custom map pricing. 10 variants: 5 digital + 5 unframed.
 - **Large cities** (London, Tokyo, Paris) may need buildings disabled at wide extents to manage memory
 - **Subprocess isolation** in batch_seo_render.py prevents matplotlib memory leaks (was consuming 15GB)
 - **Ocean fill** requires land polygon data in `data/` — full-res preferred over simplified (avoids sawtooth coastlines)
-- **Completed city renders** are moved to `etsy/renders/Posted/` after listing goes live
+- **MonoMap uses placeholder workflow** — all variants point to a placeholder image; actual art rendered per-order via `custom_fulfill.py`
+- **MonoMap coastal cities excluded** — Copenhagen, Honolulu, Lisbon, San Francisco, Seattle (ocean rendering artifacts)
+- **MonoMap Gelato UIDs** — use `style_config.GELATO_UIDS`, NOT old `gelato_connect.py` UIDs (framed UIDs are outdated there)
+- **MonoMap personalization** — required, buyer selects color: Charcoal, Navy, Forest, Terracotta, Dusty Rose, or Black
+- **MonoMap image order** — hero rotation (main/mockup4/frame8), then singles and multi-frames interleaved, 6color_labeled at position 7
+- **Completed Classic renders** in `etsy/renders/DefaultMap_Posted/`
+- **Completed Florence renders** in `etsy/renders/FlorenceMap_Posted/`
+- **Completed MonoMap renders** in `etsy/renders/POSTED/MonoMap_Posted/`
+- **Blueprint v3c renders** in `etsy/renders/BlueprintV3/` — never use old `GradientMap/` for mockups
+- **MonoMap renders** in `etsy/renders/MonoMap/{color}/`
+
+## Key Documentation
+
+- **`docs/STYLE_WORKFLOW.md`** — Complete guide for producing listings in any style (rendering, mockups, listing text, Etsy API, Gelato connection). READ THIS FIRST when starting a new batch.
+- **`GROWTH_PLAN.md`** — Strategic plan to scale from 150 to 500+ listings with competitive analysis.
+- **`etsy/style_config.py`** — Style definitions, pricing, city extent overrides.
 
 ## Development
 

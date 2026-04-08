@@ -50,6 +50,7 @@ SCOPES = [
     "listings_w",
     "shops_r",
     "shops_w",
+    "transactions_r",
 ]
 
 
@@ -91,10 +92,18 @@ def _save_credentials(creds: dict) -> None:
 
 
 def get_client_id() -> str:
-    """Get the API key (client_id) from credentials or environment."""
+    """Get the API key for x-api-key header.
+
+    Etsy requires format: 'keystring:shared_secret' in the x-api-key header.
+    Falls back to keystring-only if no secret is stored.
+    """
     creds = _load_credentials()
     if creds and creds.get("client_id"):
-        return creds["client_id"]
+        key = creds["client_id"]
+        secret = creds.get("client_secret", "")
+        if secret:
+            return f"{key}:{secret}"
+        return key
     env_key = os.environ.get("ETSY_API_KEY")
     if env_key:
         return env_key

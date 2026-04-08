@@ -26,10 +26,10 @@ ROAD_TIERS = [
 
 # Base widths for each road type (tuned for dist ~ 8000m)
 ROAD_WIDTHS = {
-    "motorway": 1.2, "motorway_link": 1.2,
-    "trunk": 1.0, "trunk_link": 1.0,
-    "primary": 0.8, "primary_link": 0.8,
-    "secondary": 0.55, "secondary_link": 0.55,
+    "motorway": 0.8, "motorway_link": 0.7,
+    "trunk": 0.7, "trunk_link": 0.6,
+    "primary": 0.6, "primary_link": 0.5,
+    "secondary": 0.45, "secondary_link": 0.45,
     "tertiary": 0.4, "tertiary_link": 0.4,
     "residential": 0.3, "living_street": 0.3, "unclassified": 0.3,
     "service": 0.15, "pedestrian": 0.15,
@@ -65,7 +65,9 @@ def get_edge_widths_by_type(highway_types: list[str], zoom_scale: float) -> list
 
 
 def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
-                 fig_scale: float = 1.0) -> None:
+                 fig_scale: float = 1.0,
+                 min_tier: str | None = None,
+                 zoom_override: float | None = None) -> None:
     """Render roads with hierarchy-based colors and widths.
 
     Roads are rendered in tier order (minor below major) so intersections
@@ -74,8 +76,14 @@ def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
     Args:
         fig_scale: Figure size scaling factor (1.0 = reference 16x20 size).
                    Adjusts linewidths so roads look consistent across print sizes.
+        min_tier: If set, only render tiers at or above this level.
+                  e.g. "secondary" skips residential, tertiary, service.
+        zoom_override: If set, use this zoom_scale directly instead of calculating.
     """
-    zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / dist)) * fig_scale
+    if zoom_override is not None:
+        zoom_scale = zoom_override
+    else:
+        zoom_scale = min(1.5, max(0.3, REFERENCE_DIST / dist)) * fig_scale
     safe_print(f"  Zoom scale: {zoom_scale:.2f} (dist={dist}m)")
 
     gdf_edges = gdf_edges_full["geometry"]
@@ -91,7 +99,15 @@ def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
     color_series = pd.Series(edge_colors, index=gdf_edges.index)
     width_series = pd.Series(edge_widths, index=gdf_edges.index, dtype=float)
 
-    for tier_name, tier_types, tier_zorder in ROAD_TIERS:
+    # Determine which tiers to render
+    tier_order = [t[0] for t in ROAD_TIERS]  # service, residential, tertiary, ...
+    if min_tier and min_tier in tier_order:
+        start_idx = tier_order.index(min_tier)
+        active_tiers = ROAD_TIERS[start_idx:]
+    else:
+        active_tiers = ROAD_TIERS
+
+    for tier_name, tier_types, tier_zorder in active_tiers:
         mask = hw_series.isin(tier_types)
         if not mask.any():
             continue
@@ -102,7 +118,7 @@ def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
             continue
         tier_geoms.plot(
             ax=ax, color=tier_colors_list, linewidth=tier_widths_list,
-            zorder=tier_zorder,
+            zorder=tier_zorder, capstyle="round", joinstyle="round",
         )
 
     # Catch-all for road types not in any tier
@@ -116,7 +132,7 @@ def render_roads(ax, gdf_edges_full, theme: dict, dist: int,
         leftover_widths = width_series[leftover_mask].tolist()
         leftover_geoms.plot(
             ax=ax, color=leftover_colors, linewidth=leftover_widths,
-            zorder=1.0,
+            zorder=1.0, capstyle="round", joinstyle="round",
         )
 
     safe_print(f"  Roads: {len(edge_highway_types)} segments rendered")

@@ -128,6 +128,23 @@ FONT_PRESETS = {
         "map_bottom_override": 0.22,
         "use_4_lines": True,
     },
+    7: {
+        "name": "county",
+        "description": "CountyMap — Cormorant Garamond serif + JetBrains Mono coords",
+        "city":     ("CormorantGaramond-Bold.ttf", "serif", "bold", "normal"),
+        "subtitle": ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "label":    ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "body":     ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "body_italic": ("CormorantGaramond-Light.ttf", "serif", "normal", "italic"),
+        "coords":   ("JetBrainsMono-Light.ttf", "monospace", "normal", "normal"),
+        "city_uppercase": True,
+        "city_letterspaced": True,
+        "line2_uppercase": True,
+        "line2_letterspaced": True,
+        "line3_uppercase": False,
+        "line3_letterspaced": False,
+        "line3_font_role": "coords",
+    },
 }
 
 
@@ -305,8 +322,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
             fontproperties=font_line2,
         )
 
-    # --- Line 3 (small detail) ---
-    line3_size = 20 * scale_factor
+    # --- Line 3 (small detail — coords) ---
+    line3_size = 14 * scale_factor
     if line3:
         display_line3 = line3
         if preset.get("line3_uppercase"):
@@ -314,7 +331,8 @@ def render_bottom_text(fig, city_name: str | None, state_name: str | None,
         if preset.get("line3_letterspaced") and is_latin_script(line3):
             display_line3 = WIDE_SPACE.join(list(display_line3))
 
-        font_line3 = _get_font(preset, "body", line3_size)
+        line3_role = preset.get("line3_font_role", "body")
+        font_line3 = _get_font(preset, line3_role, line3_size)
         fig.text(
             0.5, bottom["line_3_y"] - descender_offset,
             display_line3,
