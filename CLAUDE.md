@@ -2,6 +2,10 @@
 
 Minimalist city map art prints sold on Etsy. Digital downloads + physical prints/framed via Gelato print-on-demand.
 
+## IMPORTANT: OSM Cache Location
+**Cache is on H: drive, NOT C:.** Path: `H:\MapGen_cache`
+Configured in `utils/cache.py` (`_DEFAULT_CACHE`). All OSM data (streets, water, parks, etc.) is cached here after first download per location. Before rendering a new city/county, data is checked here automatically. Do NOT download fresh data unless the cache miss is confirmed — each county can be 5-20 GB of cached layers.
+
 ## Products
 
 1. **Pre-made Classic city maps** — 55 cities, 20 variants each (5 digital + 5 unframed + 5 framed B + 5 framed W)
@@ -342,6 +346,30 @@ python scripts/render_custom_pack_assets.py
 - **City mockups:** `etsy/mockup_composer.py` — filler cities: Pittsburgh, New Orleans, Washington DC, Amsterdam
 - **CustomMapPack mockups:** `scripts/create_custom_pack_mockups.py` — multi-color fillers for Blueprint/MonoMap
 - **Filler lookup** searches `renders/DefaultMap_Posted/`, `renders/FlorenceMap_Posted/`, `renders/BlueprintV3/`, `renders/MonoMap/`
+
+### Layer-Aware + Blend-Mode Compositing — REQUIRED for any new PSD mockup
+
+**Mandatory workflow for every new smart-object mockup template** (MonoMap, Classic, any future product). Don't use a plain `psd.composite()` + `paste()` pipeline — it breaks two ways:
+
+1. Any **foreground layer above the smart object** (hand, mask, rolled tube, frame front, plant) gets covered by the art.
+2. Any **non-NORMAL blend mode** on the smart object (commonly `MULTIPLY` in lifestyle photos) loses the baked-in shadows and reflections.
+
+**Reference implementation:** `scripts/compose_new_mockups_atlanta.py` — `compose_layer_aware(psd_path, art)`. Copy this pattern for any new mockup template. Three stages:
+1. Render layers **below** the smart object via `psd.composite(layer_filter=...)` keyed by `id(layer)`.
+2. Crop that below-render at the slot bounds, then blend the fitted art using the smart object's actual `blend_mode` (`ImageChops.multiply` for MULTIPLY, `alpha_composite` for NORMAL). Honor `opacity` via `Image.blend` if < 255. Unwired blend modes must raise, not silently fall through.
+3. Iterate layers **above** the smart object and `canvas.alpha_composite(layer.composite(), (layer.left, layer.top))` each one.
+
+**Before adding a template**, inspect it with `psd_tools`:
+```bash
+/c/Users/kimme/miniconda3/envs/py313/python.exe -c "
+from psd_tools import PSDImage
+psd = PSDImage.open(r'path\to\mockup.psd')
+for i, l in enumerate(psd):
+    print(f'[{i}] {l.kind:12s} {l.name!r:30s} blend={l.blend_mode} opacity={l.opacity}')"
+```
+Also check `l.smart_object.warp` — if `warpValue` or `warpPerspective` is non-zero, the poster is perspective-warped in the photo and a plain paste/multiply won't align (would need `cv2.warpPerspective` on the fitted art before blending — not yet implemented).
+
+**See `docs/STYLE_WORKFLOW.md` § 5 "Layer-Aware + Blend-Mode Compositing"** for the full procedure and examples. Apply this rule for MonoMap, Classic, Florence, Blueprint, CountyMap, and all future products — not just MonoMap.
 
 ## Important Constraints & Patterns
 
