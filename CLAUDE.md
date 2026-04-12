@@ -20,10 +20,12 @@ Configured in `utils/cache.py` (`_DEFAULT_CACHE`). All OSM data (streets, water,
 10. **Custom 3-Map Set** — any cities, 12 style options, 1-6 maps, unframed prints (custom-map tag, placeholder workflow)
 11. **CountyMap Digital** — U.S. county-shaped maps, 12 themes, 18 sizes, ghost background, PIL text. Etsy listing 4484494627. Render on order.
 12. **CountyMap Print** — same, 12 themes × 8 sizes ($22.51-$49.73). Etsy listing 4484494881. Files in `etsy/renders/POSTED/CountyMap_Posted/`
+13. **AtlasMap Digital** — 50 U.S. state topographic elevation maps, color-ramped relief. $9.99 flat, instant PDF delivery with Dropbox links to all 5 sizes. Files in `etsy/renders/AtlasMap/print_ready/{State}/`
+14. **AtlasMap Print** — same 50 states, 5 sizes ($22.51-$49.73), Gelato POD. 21 portrait + 29 landscape states with orientation-specific mockups.
 
 ## Current Status
 
-- **212+ Etsy listings** — 55 Classic + 39 Florence + 56 Blueprint + 59 MonoMap + custom listings + 3-Map + 2 CountyMap drafts
+- **320+ Etsy listings** — 55 Classic + 39 Florence + 56 Blueprint + 59 MonoMap + 100 AtlasMap + custom listings + 3-Map + 2 CountyMap
 - **Universal batch pipeline** built — `scripts/batch_universal.py` renders any city × style end-to-end
 - **Gelato connected** — all physical variants linked for Classic, Florence, Blueprint, MonoMap
 - **Custom fulfillment** — `custom_fulfill.py` for made-to-order (MonoMap, Blueprint color choices)
@@ -367,7 +369,21 @@ psd = PSDImage.open(r'path\to\mockup.psd')
 for i, l in enumerate(psd):
     print(f'[{i}] {l.kind:12s} {l.name!r:30s} blend={l.blend_mode} opacity={l.opacity}')"
 ```
-Also check `l.smart_object.warp` — if `warpValue` or `warpPerspective` is non-zero, the poster is perspective-warped in the photo and a plain paste/multiply won't align (would need `cv2.warpPerspective` on the fitted art before blending — not yet implemented).
+Also check `l.smart_object.warp` — if `warpValue` or `warpPerspective` is non-zero, the poster is perspective-warped in the photo and a plain paste/multiply won't align. Use `cv2.warpPerspective` with the 4-corner transform from `PlacedLayerData.transform` (see `scripts/compose_atlasmap_horizontal_mockups.py` for the working implementation).
+
+### AtlasMap Mockup System
+
+**Renders:** `etsy/renders/AtlasMap/print_ready/{State}/` — 50 states, 5 sizes each (portrait or landscape)
+**Mockups:** `{State}/mockups/` subfolder — 9 files (portrait) or 8 files (landscape)
+**Delivery PDFs:** `{State}/{State}_delivery.pdf` — branded PDF with Dropbox download links
+**Dropbox:** `/GeoLine/ElevationMaps/{State}/` — all 250 print files uploaded
+
+**Portrait mockup order (hero=main):** main, frame_wall, cls4, flatlay, frame_boho, frame15, frame33, nov3, detail_crop
+**Landscape mockup order (hero=h6):** h6, h39, h4, h42, linen, h13, h5, detail_crop
+
+**Horizontal PSD templates** use `cv2.getPerspectiveTransform` + `warpPerspective` because `psd_tools` cannot read the placed layer bounds (reports 0x0). The transform corners are extracted from `PlacedLayerData.transform` via `so.tagged_blocks.get_data(Tag.PLACED_LAYER2)`.
+
+**Publish log:** `etsy/atlasmap_publish_log.csv` — all 100 listing IDs (50 digital + 50 print)
 
 **See `docs/STYLE_WORKFLOW.md` § 5 "Layer-Aware + Blend-Mode Compositing"** for the full procedure and examples. Apply this rule for MonoMap, Classic, Florence, Blueprint, CountyMap, and all future products — not just MonoMap.
 
