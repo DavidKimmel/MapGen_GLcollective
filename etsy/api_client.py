@@ -42,14 +42,19 @@ class EtsyClient:
         self._client_id = get_client_id()
         self._session = requests.Session()
 
-    def _headers(self) -> dict[str, str]:
-        """Build request headers with current access token."""
+    def _auth_headers(self) -> dict[str, str]:
+        """Build auth headers (no Content-Type — let requests set it)."""
         token = get_access_token()
         return {
             "Authorization": f"Bearer {token}",
             "x-api-key": self._client_id,
-            "Content-Type": "application/json",
         }
+
+    def _headers(self) -> dict[str, str]:
+        """Build request headers with JSON content type."""
+        h = self._auth_headers()
+        h["Content-Type"] = "application/json"
+        return h
 
     def _rate_limit(self) -> None:
         """Enforce rate limiting between requests."""
@@ -60,7 +65,7 @@ class EtsyClient:
         _last_request_time = time.time()
 
     def _request(self, method: str, path: str, **kwargs) -> dict:
-        """Make an authenticated API request."""
+        """Make an authenticated API request (JSON)."""
         self._rate_limit()
         url = f"{API_BASE}{path}"
         resp = self._session.request(method, url, headers=self._headers(), **kwargs)
@@ -78,18 +83,43 @@ class EtsyClient:
             return {}
         return resp.json()
 
-    def _upload(self, path: str, file_path: str, field: str = "image") -> dict:
-        """Upload a file (image) to an Etsy endpoint."""
+    def _form_request(self, method: str, path: str, data: dict) -> dict:
+        """Make an authenticated request with form-urlencoded body.
+
+        Etsy's createDraftListing requires application/x-www-form-urlencoded.
+        """
         self._rate_limit()
         url = f"{API_BASE}{path}"
-        token = get_access_token()
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "x-api-key": self._client_id,
-        }
+        headers = self._auth_headers()
+        resp = self._session.request(method, url, headers=headers, data=data)
+
+        if resp.status_code >= 400:
+            try:
+                error_data = resp.json()
+                msg = error_data.get("error", resp.text)
+            except Exception:
+                error_data = None
+                msg = resp.text
+            raise EtsyApiError(resp.status_code, msg, error_data)
+
+        if resp.status_code == 204:
+            return {}
+        return resp.json()
+
+    def _upload(self, path: str, file_path: str, field: str = "image",
+                extra_fields: dict | None = None) -> dict:
+        """Upload a file (image/digital) to an Etsy endpoint."""
+        self._rate_limit()
+        url = f"{API_BASE}{path}"
+        headers = self._auth_headers()
+
+        ext = file_path.lower().rsplit(".", 1)[-1]
+        mime_map = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "pdf": "application/pdf"}
+        mime = mime_map.get(ext, "application/octet-stream")
         with open(file_path, "rb") as f:
-            files = {field: (Path(file_path).name, f, "image/png")}
-            resp = self._session.post(url, headers=headers, files=files)
+            files = {field: (Path(file_path).name, f, mime)}
+            resp = self._session.post(url, headers=headers, files=files,
+                                      data=extra_fields or {})
 
         if resp.status_code >= 400:
             try:
@@ -113,6 +143,10 @@ class EtsyClient:
     def get_shop_id(self) -> int:
         """Get the shop ID for the authenticated user."""
         user = self.get_me()
+        # shop_id may be directly in the response
+        if user.get("shop_id"):
+            return user["shop_id"]
+        # Otherwise try the shops endpoint
         user_id = user.get("user_id")
         if not user_id:
             raise EtsyApiError(0, "No user_id in response")
@@ -127,9 +161,28 @@ class EtsyClient:
         resp = self._request("GET", f"/application/shops/{shop_id}/shipping-profiles")
         return resp.get("results", [])
 
+    def get_return_policies(self, shop_id: int) -> list[dict]:
+        """List return policies for the shop."""
+        resp = self._request("GET", f"/application/shops/{shop_id}/policies/return")
+        return resp.get("results", [])
+
+    def get_shop_sections(self, shop_id: int) -> list[dict]:
+        """List shop sections."""
+        resp = self._request("GET", f"/application/shops/{shop_id}/sections")
+        return resp.get("results", [])
+
     # ------------------------------------------------------------------
     # Listing operations
     # ------------------------------------------------------------------
+
+    def get_listings_by_shop(
+        self, shop_id: int, state: str = "active",
+        limit: int = 25, offset: int = 0,
+    ) -> dict:
+        """Get listings for a shop."""
+        params = {"state": state, "limit": limit, "offset": offset}
+        return self._request("GET", f"/application/shops/{shop_id}/listings",
+                             params=params)
 
     def create_draft_listing(
         self,
@@ -141,51 +194,52 @@ class EtsyClient:
         tags: list[str] | None = None,
         who_made: str = "i_did",
         when_made: str = "made_to_order",
-        taxonomy_id: int = 67,  # Art & Collectibles > Prints > Digital Prints
-        is_digital: bool = True,
+        taxonomy_id: int = 67,
+        listing_type: str = "physical",
         shipping_profile_id: int | None = None,
+        return_policy_id: int | None = None,
+        shop_section_id: int | None = None,
+        readiness_state_id: int | None = None,
+        is_supply: bool = False,
+        should_auto_renew: bool = True,
+        is_taxable: bool = True,
     ) -> dict:
-        """Create a draft listing.
+        """Create a draft listing using form-urlencoded body.
 
-        Args:
-            shop_id: Your Etsy shop ID
-            title: Listing title (max 140 chars)
-            description: Full description
-            price: Base price in USD
-            quantity: Available quantity
-            tags: Up to 13 search tags
-            who_made: "i_did", "someone_else", "collective"
-            when_made: "made_to_order", "2020_2024", etc.
-            taxonomy_id: Etsy category ID (67 = digital prints)
-            is_digital: True for digital downloads
-            shipping_profile_id: Required for physical items
-
-        Returns:
-            Created listing data including listing_id.
+        Returns created listing data including listing_id.
         """
-        body: dict = {
+        data: dict = {
             "title": title[:140],
             "description": description,
-            "price": price,
-            "quantity": quantity,
+            "price": str(price),
+            "quantity": str(quantity),
             "who_made": who_made,
             "when_made": when_made,
-            "taxonomy_id": taxonomy_id,
-            "is_digital": is_digital,
-            "type": "download" if is_digital else "physical",
+            "taxonomy_id": str(taxonomy_id),
+            "type": listing_type,
+            "is_supply": str(is_supply).lower(),
+            "should_auto_renew": str(should_auto_renew).lower(),
+            "is_taxable": str(is_taxable).lower(),
         }
 
         if tags:
-            body["tags"] = tags[:13]  # Etsy max 13
+            data["tags[]"] = tags[:13]
 
-        if shipping_profile_id and not is_digital:
-            body["shipping_profile_id"] = shipping_profile_id
+        if shipping_profile_id and listing_type == "physical":
+            data["shipping_profile_id"] = str(shipping_profile_id)
 
-        return self._request(
-            "POST",
-            f"/application/shops/{shop_id}/listings",
-            json=body,
-        )
+        if return_policy_id:
+            data["return_policy_id"] = str(return_policy_id)
+
+        if shop_section_id:
+            data["shop_section_id"] = str(shop_section_id)
+
+        if readiness_state_id:
+            data["readiness_state_id"] = str(readiness_state_id)
+
+        # legacy=true enables readiness_state_id support
+        path = f"/application/shops/{shop_id}/listings?legacy=true"
+        return self._form_request("POST", path, data=data)
 
     def update_listing(self, shop_id: int, listing_id: int, **fields) -> dict:
         """Update fields on an existing listing."""
@@ -213,6 +267,7 @@ class EtsyClient:
         listing_id: int,
         image_path: str,
         rank: int = 1,
+        alt_text: str = "",
     ) -> dict:
         """Upload an image to a listing.
 
@@ -220,16 +275,72 @@ class EtsyClient:
             shop_id: Shop ID
             listing_id: Listing ID
             image_path: Path to PNG/JPG file
-            rank: Image position (1 = primary/hero image)
-
-        Returns:
-            Uploaded image data.
+            rank: Image position (1 = primary/hero image, up to 10)
+            alt_text: Alt text for SEO (max 500 chars)
         """
+        extra = {"rank": str(rank)}
+        if alt_text:
+            extra["alt_text"] = alt_text[:500]
         return self._upload(
             f"/application/shops/{shop_id}/listings/{listing_id}/images",
             image_path,
             field="image",
+            extra_fields=extra,
         )
+
+    def get_listing_images(self, shop_id: int, listing_id: int) -> list[dict]:
+        """Get all images for a listing."""
+        resp = self._request(
+            "GET",
+            f"/application/listings/{listing_id}/images",
+        )
+        return resp.get("results", [])
+
+    def delete_listing_image(
+        self, shop_id: int, listing_id: int, listing_image_id: int
+    ) -> dict:
+        """Delete a specific image from a listing."""
+        return self._request(
+            "DELETE",
+            f"/application/shops/{shop_id}/listings/{listing_id}/images/{listing_image_id}",
+        )
+
+    # ------------------------------------------------------------------
+    # Digital file operations
+    # ------------------------------------------------------------------
+
+    def upload_listing_file(
+        self,
+        shop_id: int,
+        listing_id: int,
+        file_path: str,
+        name: str = "",
+    ) -> dict:
+        """Upload a digital file to a listing for buyer download.
+
+        Args:
+            shop_id: Shop ID
+            listing_id: Listing ID
+            file_path: Path to the file (PDF, ZIP, PNG, etc.)
+            name: Display name for the file (shown to buyer)
+        """
+        extra = {}
+        if name:
+            extra["name"] = name
+        return self._upload(
+            f"/application/shops/{shop_id}/listings/{listing_id}/files",
+            file_path,
+            field="file",
+            extra_fields=extra,
+        )
+
+    def get_listing_files(self, shop_id: int, listing_id: int) -> list[dict]:
+        """Get digital files attached to a listing."""
+        resp = self._request(
+            "GET",
+            f"/application/shops/{shop_id}/listings/{listing_id}/files",
+        )
+        return resp.get("results", [])
 
     # ------------------------------------------------------------------
     # Inventory / variant operations
@@ -247,17 +358,14 @@ class EtsyClient:
         quantity_on_property: list[int] | None = None,
         sku_on_property: list[int] | None = None,
     ) -> dict:
-        """Update listing inventory (add size/style variants).
+        """Update listing inventory (add size/format variants).
 
         Args:
             listing_id: The listing to update
-            products: List of product variant dicts
+            products: List of product variant dicts with sku, property_values, offerings
             price_on_property: Property IDs that affect price
             quantity_on_property: Property IDs that affect quantity
             sku_on_property: Property IDs that affect SKU
-
-        Returns:
-            Updated inventory data.
         """
         body: dict = {"products": products}
         if price_on_property is not None:

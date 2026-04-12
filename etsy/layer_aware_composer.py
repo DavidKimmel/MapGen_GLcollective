@@ -23,6 +23,37 @@ from psd_tools.constants import BlendMode
 from etsy.mockup_composer import MockupSlot, fit_to_slot
 
 
+def fill_to_slot(art: Image.Image, slot: MockupSlot) -> Image.Image:
+    """Scale art to FILL the slot completely, cropping excess.
+
+    Unlike `fit_to_slot` which pads with white to avoid cropping,
+    this scales to the *larger* dimension so the slot is fully covered,
+    then center-crops the overflow. At typical mismatches (2-5%) this
+    loses only a sliver off the top/bottom or left/right — far less
+    noticeable than white padding bars.
+    """
+    art_ratio = art.width / art.height
+    slot_ratio = slot.width / slot.height
+
+    if abs(art_ratio - slot_ratio) < 0.01:
+        return art.resize((slot.width, slot.height), Image.LANCZOS)
+
+    # Scale to the LARGER dimension (fill, not fit)
+    scale_by_width = slot.width / art.width
+    scale_by_height = slot.height / art.height
+    scale = max(scale_by_width, scale_by_height)
+
+    scaled_w = round(art.width * scale)
+    scaled_h = round(art.height * scale)
+    scaled = art.resize((scaled_w, scaled_h), Image.LANCZOS)
+
+    # Center-crop to slot dimensions
+    left = (scaled_w - slot.width) // 2
+    top = (scaled_h - slot.height) // 2
+    cropped = scaled.crop((left, top, left + slot.width, top + slot.height))
+    return cropped
+
+
 def find_smart_object_index(psd: PSDImage) -> int:
     """Return the top-level index of the first smart object layer.
 
@@ -34,14 +65,27 @@ def find_smart_object_index(psd: PSDImage) -> int:
     raise ValueError("No smart object found at the top level of the PSD")
 
 
-def compose_layer_aware(psd_path: Path, art: Image.Image) -> Image.Image:
+def compose_layer_aware(
+    psd_path: Path,
+    art: Image.Image,
+    *,
+    fill: bool = False,
+) -> Image.Image:
     """Render `psd_path` with its smart object replaced by `art`.
+
+    Args:
+        psd_path: Path to the PSD mockup template.
+        art: The artwork to insert (RGBA).
+        fill: If True, use `fill_to_slot` (scale-to-cover, crop excess)
+              instead of `fit_to_slot` (scale-to-fit, pad with white).
+              Use fill=True when the slot ratio doesn't match the art ratio
+              and white padding bars are unacceptable.
 
     Three stages:
       1. Render layers BELOW the smart object via `psd.composite(layer_filter=...)`
          — gives the "scene with white poster + baked-in shadows".
-      2. Blend the fitted art into the slot using the smart object's real
-         blend mode (NORMAL -> alpha composite, MULTIPLY -> pixel multiply),
+      2. Blend the fitted/filled art into the slot using the smart object's
+         real blend mode (NORMAL -> alpha composite, MULTIPLY -> pixel multiply),
          honoring opacity.
       3. Iterate layers ABOVE the smart object and alpha-composite each on top
          at its own (left, top) origin so foreground elements stay in front.
@@ -72,8 +116,8 @@ def compose_layer_aware(psd_path: Path, art: Image.Image) -> Image.Image:
         below = Image.new("RGB", psd.size, (255, 255, 255))
     canvas = below.convert("RGBA")
 
-    # Stage 2 — blend the fitted art at the slot bounds, honoring blend mode.
-    fitted = fit_to_slot(art, slot)
+    # Stage 2 — blend the fitted/filled art at the slot bounds, honoring blend mode.
+    fitted = fill_to_slot(art, slot) if fill else fit_to_slot(art, slot)
     slot_box = (slot.left, slot.top, slot.right, slot.bottom)
     below_under_slot = canvas.crop(slot_box).convert("RGB")
     fitted_rgb = fitted.convert("RGB")
