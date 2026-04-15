@@ -129,6 +129,24 @@ FONT_PRESETS = {
         "use_4_lines": True,
     },
     7: {
+        "name": "custom_home",
+        "description": "Custom Home — Cormorant Garamond title/body + script names (line 2)",
+        "city":     ("CormorantGaramond-Bold.ttf", "serif", "bold", "normal"),
+        "subtitle": ("GreatVibes-Regular.ttf", "cursive", "normal", "normal"),
+        "label":    ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "body":     ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "body_italic": ("CormorantGaramond-Italic.ttf", "serif", "normal", "italic"),
+        "coords":   ("CormorantGaramond-Light.ttf", "serif", "normal", "normal"),
+        "city_uppercase": True,
+        "city_letterspaced": True,
+        "line2_uppercase": False,
+        "line2_letterspaced": False,
+        "line2_font_role": "subtitle",
+        "line2_size_scale": 2.5,
+        "line3_uppercase": False,
+        "line3_letterspaced": True,
+    },
+    8: {
         "name": "county",
         "description": "CountyMap — Cormorant Garamond serif + JetBrains Mono coords",
         "city":     ("CormorantGaramond-Bold.ttf", "serif", "bold", "normal"),
@@ -161,15 +179,15 @@ def get_zone_positions(has_top_label: bool = False,
 
     if layout == "date_night":
         # Heart centered with text above and below
-        map_bottom = 0.20
-        map_height = 0.60
+        map_bottom = 0.22
+        map_height = 0.56
         top_zone_y = None  # handled by render_date_night_text
 
         bottom_zone = {
             "line_1_y": 0.88,   # names — above heart
-            "line_2_y": 0.115,  # tagline — below heart
-            "line_3_y": 0.082,  # location
-            "line_4_y": 0.056,  # date
+            "line_2_y": 0.145,  # tagline — below heart
+            "line_3_y": 0.108,  # location — tighter to tagline
+            "line_4_y": 0.075,  # date — equal gap below location
         }
 
         return {
@@ -362,13 +380,13 @@ def render_date_night_text(fig, scale_factor: float = 1.0,
                            text_line_4: str | None = None) -> None:
     """Render text for date_night layout: line 1 above heart, lines 2-4 below.
 
-    Line 1: Names (large script, above heart) — uses font_preset (e.g., 3=Priestacy)
-    Line 2: Tagline (bold serif, below heart) — always font 2 (High Tower Text)
-    Line 3: Location (normal serif) — always font 2
-    Line 4: Date (normal serif) — always font 2
+    Line 1: Names (large script, above heart) — uses font_preset
+    Line 2: Tagline (Cormorant Garamond Bold, uppercase, letterspaced)
+    Line 3: Location (Cormorant Garamond Light, uppercase, letterspaced)
+    Line 4: Date (JetBrains Mono Light)
     """
     title_preset = get_font_preset(font_preset)
-    body_preset = get_font_preset(2)  # High Tower Text for bottom lines
+    county_preset = get_font_preset(8)  # county preset — Cormorant + JetBrains
     zones = get_zone_positions(layout="date_night")
     bz = zones["bottom_zone"]
 
@@ -386,35 +404,36 @@ def render_date_night_text(fig, scale_factor: float = 1.0,
             fontproperties=font_line1,
         )
 
-    # --- Line 2: Tagline below heart (Garamond Bold, larger) ---
+    # --- Line 2: Tagline below heart (Cormorant Garamond Bold, uppercase, letterspaced) ---
     if text_line_2:
-        line2_size = 28 * scale_factor
-        garamond_bold = os.path.join(FONTS_DIR, "Garamond-Bold.ttf")
-        font_line2 = FontProperties(fname=garamond_bold, size=line2_size)
+        line2_size = 30 * scale_factor
+        font_line2 = _get_font(county_preset, "city", line2_size)
+        display_text = WIDE_SPACE.join(list(text_line_2.upper()))
         fig.text(
             0.5, bz["line_2_y"],
-            text_line_2,
+            display_text,
             color=text_color,
             ha="center", va="center",
             fontproperties=font_line2,
         )
 
-    # --- Line 3: Location (normal serif) ---
+    # --- Line 3: Location (Cormorant Garamond Light, uppercase, letterspaced) ---
     if text_line_3:
-        line3_size = 18 * scale_factor
-        font_line3 = _get_font(body_preset, "body", line3_size)
+        line3_size = 20 * scale_factor
+        font_line3 = _get_font(county_preset, "subtitle", line3_size)
+        display_text = WIDE_SPACE.join(list(text_line_3.upper()))
         fig.text(
             0.5, bz["line_3_y"],
-            text_line_3,
+            display_text,
             color=text_color,
             ha="center", va="center",
             fontproperties=font_line3,
         )
 
-    # --- Line 4: Date (normal serif) ---
+    # --- Line 4: Date (JetBrains Mono Light) ---
     if text_line_4:
-        line4_size = 18 * scale_factor
-        font_line4 = _get_font(body_preset, "body", line4_size)
+        line4_size = 16 * scale_factor
+        font_line4 = _get_font(county_preset, "coords", line4_size)
         fig.text(
             0.5, bz["line_4_y"],
             text_line_4,

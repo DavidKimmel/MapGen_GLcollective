@@ -43,8 +43,8 @@ def main():
                         help="Pin style: 1=heart, 2=heart-pin, 3=classic, 4=house, 5=grad cap")
     parser.add_argument("--pin-color", default=None,
                         help="Custom hex color for pin (e.g., #D4736B)")
-    parser.add_argument("--font-preset", type=int, default=1, choices=[1, 2, 3, 4, 5, 6],
-                        help="Font preset: 1=sans, 2=serif, 3=script, 4=cursive, 5=classic, 6=house")
+    parser.add_argument("--font-preset", type=int, default=1, choices=[1, 2, 3, 4, 5, 6, 7, 8],
+                        help="Font preset: 1=sans, 2=serif, 3=script, 4=cursive, 5=classic, 6=house, 7=custom_home, 8=county")
     parser.add_argument("--text-line-1", default=None,
                         help="Large title text (e.g., 'Our First Home')")
     parser.add_argument("--text-line-2", default=None,

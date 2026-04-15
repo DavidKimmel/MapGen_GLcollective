@@ -186,7 +186,7 @@ def fetch_all_osm_data(point: tuple[float, float], dist: int,
             safe_print("  [6/14] Downloading waterway lines...")
             waterway_lines = fetch_features(
                 point, compensated_dist,
-                tags={"waterway": ["river", "stream", "canal"]},
+                tags={"waterway": ["river", "stream", "canal", "ditch", "drain", "creek"]},
                 name="waterway_lines",
             )
         else:
@@ -502,7 +502,7 @@ def render_water(ax, water, target_crs, theme: dict,
         return
     water_polys = project_cached(water_polys, target_crs, "water")
     water_polys.plot(
-        ax=ax, facecolor=theme['water'], edgecolor='none', zorder=0.5,
+        ax=ax, facecolor=theme['water'], edgecolor='none', zorder=1.1,
     )
     safe_print(f"  Water: {len(water_polys)} polygons")
 
@@ -550,7 +550,7 @@ def render_waterway_lines(ax, waterway_lines, target_crs, theme: dict,
         )
     else:
         ww_types = "stream"
-    width_map = {"river": 1.2, "canal": 0.8}
+    width_map = {"river": 1.2, "canal": 0.8, "ditch": 0.3, "drain": 0.3, "creek": 0.5}
     if isinstance(ww_types, str):
         ww_widths = [width_map.get(ww_types, 0.4) * zoom_scale] * len(ww_lines)
     else:
@@ -559,8 +559,8 @@ def render_waterway_lines(ax, waterway_lines, target_crs, theme: dict,
     ww_outline_color = theme.get("waterway_outline")
     if ww_outline_color:
         ww_casing = [w + 0.6 * zoom_scale for w in ww_widths]
-        ww_lines.plot(ax=ax, color=ww_outline_color, linewidth=ww_casing, zorder=0.54)
-    ww_lines.plot(ax=ax, color=waterway_color, linewidth=ww_widths, zorder=0.55)
+        ww_lines.plot(ax=ax, color=ww_outline_color, linewidth=ww_casing, zorder=1.14)
+    ww_lines.plot(ax=ax, color=waterway_color, linewidth=ww_widths, zorder=1.15)
     safe_print(f"  Waterway lines: {len(ww_lines)} features")
 
 
@@ -629,9 +629,10 @@ def render_buildings(ax, buildings, target_crs, theme: dict) -> None:
     if bldg_polys.empty:
         return
     bldg_polys = project_cached(bldg_polys, target_crs, "buildings")
+    bldg_edge = theme.get("building_edge", "#D0D0C8")
     bldg_polys.plot(
-        ax=ax, facecolor=theme["buildings"], edgecolor="none",
-        alpha=0.6, zorder=0.9,
+        ax=ax, facecolor=theme["buildings"], edgecolor=bldg_edge,
+        linewidth=0.15, alpha=0.85, zorder=0.9,
     )
     safe_print(f"  Buildings: {len(bldg_polys)} polygons")
 
