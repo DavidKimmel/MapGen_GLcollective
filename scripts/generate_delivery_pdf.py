@@ -14,33 +14,21 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import re
 import sys
-import time
 from pathlib import Path
-from urllib import request, error
 
 from fpdf import FPDF
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-ATLAS_DIR = Path(r"C:\MapGen_GLcollective\etsy\renders\AtlasMap\print_ready")
-FONTS_DIR = Path(r"C:\MapGen_GLcollective\fonts")
-OUT_DIR = Path(r"C:\MapGen_GLcollective\etsy\renders\AtlasMap\delivery_pdfs")
-DROPBOX_BASE = "/GeoLine/ElevationMaps"
+from etsy import r2_storage
 
-# Load .env for Dropbox token
-_env_path = Path(__file__).parent.parent / ".env"
-if _env_path.exists():
-    with open(_env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip())
+_PROJECT = Path(__file__).parent.parent
+ATLAS_DIR = _PROJECT / "etsy" / "renders" / "POSTED" / "AtlasMap_Posted" / "print_ready"
+FONTS_DIR = _PROJECT / "fonts"
+OUT_DIR = ATLAS_DIR
 
 HORIZONTAL_STATES: set[str] = {
     "Alaska", "Arkansas", "Colorado", "Connecticut", "Florida", "Hawaii",
@@ -72,46 +60,6 @@ def get_sizes(state: str) -> list[str]:
 def get_display_sizes() -> list[str]:
     """Display sizes always shown in standard WxH format."""
     return ["8x10", "11x14", "16x20", "18x24", "24x36"]
-
-
-def get_dropbox_shared_link(token: str, path: str) -> str | None:
-    """Create or get a shared link for a Dropbox file."""
-    # First try to create a new link
-    url = "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings"
-    body = json.dumps({
-        "path": path,
-        "settings": {"requested_visibility": "public"},
-    })
-    req = request.Request(url, data=body.encode(), headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    })
-    try:
-        resp = request.urlopen(req)
-        data = json.loads(resp.read())
-        return data["url"].replace("?dl=0", "?dl=1")
-    except error.HTTPError as e:
-        body_text = e.read().decode()
-        if "shared_link_already_exists" not in body_text:
-            print(f"    Dropbox link error for {path}: {body_text[:200]}")
-            return None
-
-    # Link already exists — fetch it
-    url2 = "https://api.dropboxapi.com/2/sharing/list_shared_links"
-    body2 = json.dumps({"path": path, "direct_only": True})
-    req2 = request.Request(url2, data=body2.encode(), headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    })
-    try:
-        resp2 = request.urlopen(req2)
-        data2 = json.loads(resp2.read())
-        links = data2.get("links", [])
-        if links:
-            return links[0]["url"].replace("?dl=0", "?dl=1")
-    except error.HTTPError as e2:
-        print(f"    Dropbox list_shared_links error: {e2.read().decode()[:200]}")
-    return None
 
 
 def create_preview_thumbnail(state: str) -> Path:
@@ -289,20 +237,15 @@ def generate_pdf(state: str, links: dict[str, str]) -> Path:
     return out_path
 
 
-def generate_links_for_state(token: str, state: str) -> dict[str, str]:
-    """Generate Dropbox shared links for all sizes of a state."""
+def generate_links_for_state(state: str) -> dict[str, str]:
+    """Permanent R2 URL per size, derived from each local print file."""
     sizes = get_sizes(state)
     links: dict[str, str] = {}
     for size in sizes:
-        # Find the actual filename
         for f in (ATLAS_DIR / state).iterdir():
             if f.name.endswith(f"_{size}.png"):
-                dropbox_path = f"{DROPBOX_BASE}/{state}/{f.name}"
-                link = get_dropbox_shared_link(token, dropbox_path)
-                if link:
-                    links[size] = link
+                links[size] = r2_storage.render_url(f)
                 break
-        time.sleep(0.3)  # rate limit
     return links
 
 
@@ -314,8 +257,6 @@ def main() -> int:
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    token = os.getenv("DROPBOX_ACCESS_TOKEN", "")
 
     if args.state:
         states = [args.state]
@@ -332,13 +273,13 @@ def main() -> int:
     for i, state in enumerate(states, 1):
         print(f"[{i}/{len(states)}] {display_name(state)}")
 
-        if args.dry_run or not token:
-            links = {s: "" for s in get_sizes(state)}
-            if not token:
-                print("    (no Dropbox token — links will say 'pending')")
-        else:
-            links = generate_links_for_state(token, state)
-            print(f"    {len(links)} Dropbox links generated")
+        links = generate_links_for_state(state)
+        print(f"    {len(links)} R2 links")
+
+        if args.dry_run:
+            for s, u in links.items():
+                print(f"      {s}: {u}")
+            continue
 
         out = generate_pdf(state, links)
         size_kb = out.stat().st_size // 1024

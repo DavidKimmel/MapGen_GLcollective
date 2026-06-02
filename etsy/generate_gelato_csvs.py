@@ -12,13 +12,10 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import sys
-import time
 from pathlib import Path
-from typing import Any
-from urllib import request, error
 
+from etsy import r2_storage
 from etsy.city_list import ALL_CITIES, CityListing, get_city
 
 # ---------------------------------------------------------------------------
@@ -46,68 +43,26 @@ SIZE_MM_INCH: dict[str, str] = {
     size: f"{mm}-mm-{size}-inch" for size, mm in SIZE_MM.items()
 }
 
-DROPBOX_BASE = "/GeoLine"
 RENDERS_DIR = Path(__file__).parent / "renders"
+# Classic (37th_parallel) print files live here after the POSTED reorg.
+CLASSIC_DIR = RENDERS_DIR / "POSTED" / "DefaultMap_Posted"
 
 
 # ---------------------------------------------------------------------------
-# Dropbox API helpers
+# R2 file URLs
 # ---------------------------------------------------------------------------
 
-def dropbox_api(token: str, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-    """Make a Dropbox API call."""
-    url = f"https://api.dropboxapi.com/2/{endpoint}"
-    data = json.dumps(payload).encode("utf-8")
-    req = request.Request(url, data=data, headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    })
-    try:
-        with request.urlopen(req) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        raise RuntimeError(f"Dropbox API error {e.code}: {body}") from e
+def get_file_links_for_city(city: CityListing) -> dict[str, str]:
+    """Return the permanent R2 URL for all 5 sizes of a city. Returns {size: url}.
 
-
-def get_or_create_shared_link(token: str, path: str) -> str:
-    """Get existing shared link or create a new one, return direct download URL."""
-    # Try to create a shared link
-    try:
-        result = dropbox_api(token, "sharing/create_shared_link_with_settings", {
-            "path": path,
-            "settings": {"requested_visibility": "public"},
-        })
-        url = result["url"]
-    except RuntimeError as e:
-        if "shared_link_already_exists" in str(e):
-            # Link already exists, fetch it
-            result = dropbox_api(token, "sharing/list_shared_links", {
-                "path": path,
-                "direct_only": True,
-            })
-            links = result.get("links", [])
-            if not links:
-                raise RuntimeError(f"No shared links found for {path}") from e
-            url = links[0]["url"]
-        else:
-            raise
-
-    # Convert to direct download: replace dl=0 with dl=1
-    return url.replace("dl=0", "dl=1")
-
-
-def get_shared_links_for_city(token: str, city: CityListing) -> dict[str, str]:
-    """Get shared links for all 5 sizes of a city. Returns {size: url}."""
+    The print file's R2 key is its path relative to etsy/renders/, so the URL
+    resolves once the file is seeded (scripts/r2_seed.sh)."""
     links: dict[str, str] = {}
     for size in SIZES:
-        filename = f"{city.slug}_{size}.png"
-        path = f"{DROPBOX_BASE}/{city.slug}/{filename}"
-        print(f"  {filename}...", end=" ", flush=True)
-        url = get_or_create_shared_link(token, path)
-        links[size] = url
-        print("OK")
-        time.sleep(0.2)  # Rate limiting
+        local = CLASSIC_DIR / city.slug / f"{city.slug}_{size}.png"
+        if not local.exists():
+            print(f"  WARN: missing render {local}")
+        links[size] = r2_storage.render_url(local)
     return links
 
 
@@ -200,7 +155,6 @@ def listing_title(city: CityListing) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Gelato CSVs for all cities")
-    parser.add_argument("--token", required=True, help="Dropbox access token")
     parser.add_argument("--city", help="Generate for a single city (slug or name)")
     parser.add_argument("--listing-id", default="", help="Etsy listing ID (optional)")
     parser.add_argument("--title", default="", help="Override listing title (must match Etsy exactly)")
@@ -225,7 +179,7 @@ def main() -> None:
 
     for city in cities:
         print(f"[{city.city}]")
-        links = get_shared_links_for_city(args.token, city)
+        links = get_file_links_for_city(city)
         title = args.title if args.title else listing_title(city)
         csv_path = generate_csv_for_city(city, links, title, args.listing_id)
         print(f"  -> {csv_path}\n")

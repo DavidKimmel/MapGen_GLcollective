@@ -33,15 +33,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import sys
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from urllib import request, error
 
 from engine.renderer import render_poster
+from etsy import r2_storage
 from etsy.gelato_connect import (
     gelato_api,
     _load_api_key,
@@ -49,7 +47,6 @@ from etsy.gelato_connect import (
     STORE_ID,
 )
 from etsy.generate_gelato_csvs import (
-    get_or_create_shared_link,
     product_uid_unframed,
     SIZES,
 )
@@ -60,7 +57,7 @@ from etsy.generate_gelato_csvs import (
 
 PROJECT_DIR = Path(__file__).parent.parent
 CUSTOM_OUTPUT_DIR = PROJECT_DIR / "posters" / "custom"
-DROPBOX_CUSTOM_PATH = "/GeoLine/custom"
+R2_CUSTOM_PREFIX = "custom"
 
 # The custom listing title in Etsy/Gelato (used to find the product)
 CUSTOM_PRODUCT_TITLE = "Custom Map Print"
@@ -161,60 +158,25 @@ def render_custom_map(order: CustomOrder) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Upload to Dropbox
+# Step 2: Upload to R2
 # ---------------------------------------------------------------------------
 
-def dropbox_upload_file(token: str, local_path: str, dropbox_path: str) -> dict:
-    """Upload a file to Dropbox via the content API."""
-    url = "https://content.dropboxapi.com/2/files/upload"
-    api_arg = json.dumps({
-        "path": dropbox_path,
-        "mode": "overwrite",
-        "autorename": False,
-        "mute": True,
-    })
-
-    with open(local_path, "rb") as f:
-        file_data = f.read()
-
-    req = request.Request(url, data=file_data, headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/octet-stream",
-        "Dropbox-API-Arg": api_arg,
-    })
-
-    try:
-        with request.urlopen(req, timeout=300) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        raise RuntimeError(f"Dropbox upload error {e.code}: {body}") from e
-
-
-def upload_to_dropbox(token: str, local_path: str, order_id: str,
-                      size: str) -> str:
-    """Upload rendered file to Dropbox and return direct download URL."""
-    filename = f"{order_id}_{size}.png"
-    dropbox_path = f"{DROPBOX_CUSTOM_PATH}/{filename}"
-
+def upload_to_r2(local_path: str, key: str) -> str:
+    """Upload rendered file to R2 and return its permanent public URL."""
     print(f"\n{'='*60}")
-    print(f"STEP 2: Uploading to Dropbox")
+    print(f"STEP 2: Uploading to R2")
     print(f"{'='*60}")
 
     file_size_mb = os.path.getsize(local_path) / 1e6
     print(f"  File: {local_path} ({file_size_mb:.1f} MB)")
-    print(f"  Dest: {dropbox_path}")
+    print(f"  Key:  {key}")
     print(f"  Uploading...", end=" ", flush=True)
 
-    dropbox_upload_file(token, local_path, dropbox_path)
+    url = r2_storage.upload_file(local_path, key)
     print("OK")
+    print(f"  URL: {url}")
 
-    print(f"  Getting shared link...", end=" ", flush=True)
-    dl_url = get_or_create_shared_link(token, dropbox_path)
-    print("OK")
-    print(f"  URL: {dl_url}")
-
-    return dl_url
+    return url
 
 
 # ---------------------------------------------------------------------------
@@ -354,16 +316,15 @@ def fulfill_order(order: CustomOrder, dry_run: bool = False,
         print(f"Run without --render-only to upload and connect to Gelato.")
         return
 
-    # --- Upload to Dropbox ---
-    dropbox_token = _load_env_var("DROPBOX_ACCESS_TOKEN")
+    # --- Upload to R2 ---
+    key = f"{R2_CUSTOM_PREFIX}/{order.order_id}_{order.size}.png"
 
     if dry_run:
-        dropbox_path = f"{DROPBOX_CUSTOM_PATH}/{order.order_id}_{order.size}.png"
-        print(f"\n[DRY RUN] Would upload to Dropbox: {dropbox_path}")
-        file_url = f"https://www.dropbox.com/placeholder/{order.order_id}?dl=1"
+        file_url = r2_storage.public_url(key)
+        print(f"\n[DRY RUN] Would upload to R2: {key}")
+        print(f"[DRY RUN] Public URL: {file_url}")
     else:
-        file_url = upload_to_dropbox(
-            dropbox_token, output_path, order.order_id, order.size)
+        file_url = upload_to_r2(output_path, key)
 
     # --- Push to Gelato ---
     gelato_key = _load_api_key()
@@ -376,7 +337,7 @@ def fulfill_order(order: CustomOrder, dry_run: bool = False,
     elif success:
         print(f"  FULFILLMENT COMPLETE — {order.order_id}")
         print(f"  File: {output_path}")
-        print(f"  Dropbox: {file_url}")
+        print(f"  R2: {file_url}")
         print(f"  Gelato: Variant connected for {order.size}")
         print(f"\n  Next: Approve the order in Gelato dashboard")
     else:

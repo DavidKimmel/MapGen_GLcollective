@@ -1,6 +1,6 @@
 """DEPRECATED — superseded by scripts/r2_seed.sh (Cloudflare R2 migration, 2026-06).
 
-AtlasMap print files are no longer uploaded to Dropbox. All deliverables (print
+Florence print files are no longer uploaded to Dropbox. All deliverables (print
 PNGs + delivery PDFs under etsy/renders/) are seeded to the R2 bucket by:
 
     bash scripts/r2_seed.sh          # full seed / resume (idempotent)

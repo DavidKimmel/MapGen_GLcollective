@@ -20,7 +20,7 @@ Configured in `utils/cache.py` (`_DEFAULT_CACHE`). All OSM data (streets, water,
 10. **Custom 3-Map Set** — any cities, 12 style options, 1-6 maps, unframed prints (custom-map tag, placeholder workflow)
 11. **CountyMap Digital** — U.S. county-shaped maps, 12 themes, 18 sizes, ghost background, PIL text. Etsy listing 4484494627. Render on order.
 12. **CountyMap Print** — same, 12 themes × 8 sizes ($22.51-$49.73). Etsy listing 4484494881. Files in `etsy/renders/POSTED/CountyMap_Posted/`
-13. **AtlasMap Digital** — 50 U.S. state topographic elevation maps, color-ramped relief. $9.99 flat, instant PDF delivery with Dropbox links to all 5 sizes. Files in `etsy/renders/AtlasMap/print_ready/{State}/`
+13. **AtlasMap Digital** — 50 U.S. state topographic elevation maps, color-ramped relief. $9.99 flat, instant PDF delivery with R2 links to all 5 sizes. Files in `etsy/renders/POSTED/AtlasMap_Posted/print_ready/{State}/`
 14. **AtlasMap Print** — same 50 states, 5 sizes ($22.51-$49.73), Gelato POD. 21 portrait + 29 landscape states with orientation-specific mockups.
 
 ## Current Status
@@ -58,11 +58,11 @@ Mapgen_GLcollective/
 │   ├── city_list.py          # 35 cities (4 tiers) with CityListing dataclass
 │   ├── listing_generator.py  # SEO titles, descriptions, tags, pricing
 │   ├── gelato_connect.py     # Gelato API: 3-step variant connection
-│   ├── generate_gelato_csvs.py  # Dropbox links → Gelato import CSV
+│   ├── generate_gelato_csvs.py  # R2 links → Gelato import CSV
 │   ├── batch_etsy_render.py  # Render all 5 sizes for a city
 │   ├── image_composer.py     # Detail crop + size comparison images
 │   ├── mockup_composer.py    # PSD mockup generation (7 templates, filler cities)
-│   ├── custom_fulfill.py     # Custom order: render → Dropbox → Gelato
+│   ├── custom_fulfill.py     # Custom order: render → R2 → Gelato
 │   ├── custom_listing.py     # "Any location" listing content
 │   ├── generate_style_sheet.py  # Font + pin style reference image
 │   ├── auth.py               # Etsy OAuth2 PKCE flow
@@ -86,7 +86,7 @@ Mapgen_GLcollective/
 │   ├── batch_florence_production.py  # Render Florence cities (master crop approach)
 │   ├── batch_mono_samples.py # Render MonoMap samples (6 colors × 5 cities)
 │   ├── batch_gradient_samples.py  # Render Blueprint raw maps (OLD compositor)
-│   ├── batch_dropbox_upload.py  # Upload renders to Dropbox
+│   ├── r2_seed.sh            # Seed/resync renders to R2 (replaces batch_dropbox_upload*)
 │   ├── batch_full_pipeline.py   # Full pipeline: render + mockups + listing text
 │   ├── create_custom_pack_listings.py  # CustomMapPack: hero, detail, swatches
 │   ├── create_custom_pack_mockups.py   # CustomMapPack: 7 mockups per style
@@ -154,8 +154,8 @@ python -m etsy.mockup_composer --city city_slug
 # Generate listing images (detail crop + size comparison)
 python -m etsy.image_composer --city "City Name" --all
 
-# Generate Gelato CSV (needs Dropbox token)
-python -m etsy.generate_gelato_csvs --city city_slug --token TOKEN
+# Generate Gelato CSV (R2 URLs — no token needed)
+python -m etsy.generate_gelato_csvs --city city_slug
 
 # Connect city to Gelato (after Etsy listing syncs)
 python -m etsy.gelato_connect --city "City Name"
@@ -166,8 +166,8 @@ python scripts/batch_seo_render.py
 python scripts/batch_seo_render.py --city "City Name" --force
 python scripts/batch_seo_render.py --start-from "City Name"
 
-# Upload renders to Dropbox
-python scripts/batch_dropbox_upload.py
+# Upload/sync renders to R2 (resumable; only new/changed files transfer)
+bash scripts/r2_seed.sh
 
 # Generate font/pin style sheet
 python -m etsy.generate_style_sheet
@@ -183,10 +183,10 @@ python scripts/batch_seo_render.py --city "City Name" --force
 python -m etsy.mockup_composer --city city_slug
 # 4. Generate listing text
 python -m etsy.listing_generator --generate-texts
-# 5. Upload to Dropbox (need fresh token)
-python scripts/batch_dropbox_upload.py --start-from city_slug
-# 6. Generate Gelato CSV
-python -m etsy.generate_gelato_csvs --city city_slug --token TOKEN
+# 5. Upload renders to R2 (resumable; only new/changed files transfer)
+bash scripts/r2_seed.sh
+# 6. Generate Gelato CSV (R2 URLs, no token needed)
+python -m etsy.generate_gelato_csvs --city city_slug
 # 7. Create listing in Etsy (manual: copy existing, swap content)
 # 8. Sync in Gelato dashboard
 # 9. Connect variants
@@ -278,13 +278,17 @@ python cli.py --location "City" --theme theme_name --size 24x36
 - **Etsy shop:** GeoLine Collective (GeoLineCollective)
 - **Physical prints:** Gelato print-on-demand via Ecommerce API
 - **Gelato Store ID:** `3e2b887f-ccb6-465d-9000-adfc312b0b1f`
-- **Digital delivery:** Message buyers with Dropbox download link
-- **Dropbox shared links** use `?dl=1` suffix for direct download
-- **Dropbox tokens expire ~4 hours** — regenerate at https://www.dropbox.com/developers/apps
+- **File storage: Cloudflare R2** (migrated from Dropbox 2026-06-01). Bucket `geoline`, served
+  at `https://geoline.neodigitalventures.com/<key>`. **Object key = path relative to
+  `etsy/renders/`.** Helper: `etsy/r2_storage.py` (`upload_render`, `render_url`). Seed/resync
+  all deliverables: `bash scripts/r2_seed.sh` (resumable; print PNGs + PDFs only, skips mockups).
+- **Digital delivery:** buyer download links point to R2 — permanent, no expiring token
+- **R2 credentials** live in `.env` (`R2_ACCOUNT_ID/R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY/
+  R2_BUCKET/R2_PUBLIC_BASE`) and do not expire
 
 ### Gelato API Connection (3 steps per variant — all required)
 1. `PATCH` variant with `productUid`
-2. `POST` print-file with Dropbox URL
+2. `POST` print-file with R2 URL (`https://geoline.neodigitalventures.com/<key>`)
 3. `PATCH` variant with `connectionStatus: "connected"`
 
 ### Pricing (matched to competitor 37thParallelDesigns)
@@ -375,8 +379,8 @@ Also check `l.smart_object.warp` — if `warpValue` or `warpPerspective` is non-
 
 **Renders:** `etsy/renders/AtlasMap/print_ready/{State}/` — 50 states, 5 sizes each (portrait or landscape)
 **Mockups:** `{State}/mockups/` subfolder — 9 files (portrait) or 8 files (landscape)
-**Delivery PDFs:** `{State}/{State}_delivery.pdf` — branded PDF with Dropbox download links
-**Dropbox:** `/GeoLine/ElevationMaps/{State}/` — all 250 print files uploaded
+**Delivery PDFs:** `{State}/{State}_delivery.pdf` — branded PDF with R2 download links (regenerate: `python -m scripts.generate_delivery_pdf --all`)
+**R2:** keys under `POSTED/AtlasMap_Posted/print_ready/{State}/` — all 250 print files seeded
 
 **Portrait mockup order (hero=main):** main, frame_wall, cls4, flatlay, frame_boho, frame15, frame33, nov3, detail_crop
 **Landscape mockup order (hero=h6):** h6, h39, h4, h42, linen, h13, h5, detail_crop
@@ -394,7 +398,7 @@ Also check `l.smart_object.warp` — if `warpValue` or `warpPerspective` is non-
 - **Highway widths reduced** (2026-04-01) — motorway 0.8 (was 1.2), trunk 0.7 (was 1.0), primary 0.6 (was 0.8) for cleaner look
 - **Coordinates on line 3** — renderer auto-adds GPS coords below state/country on all default renders
 - **Etsy title must match exactly** in Gelato CSV/API — mismatches cause "Product not found"
-- **Dropbox tokens are short-lived** (~4 hours) — shared links persist permanently
+- **R2 URLs are permanent** — no token expiry; key = path relative to `etsy/renders/`
 - **Digital variants** always show "not connected" in Gelato — this is expected
 - **fig_scale** must be applied to all rendering for consistent linewidths
 - **Large cities** (London, Tokyo, Paris) may need buildings disabled at wide extents to manage memory
