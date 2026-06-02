@@ -13,6 +13,13 @@ GELATO_UIDS: dict[str, dict[str, str]] = {
         "18x24": "flat_18x24-inch-450x600-mm_170-gsm-65lb-uncoated_4-0_ver",
         "24x36": "flat_24x36-inch-600x900-mm_170-gsm-65lb-uncoated_4-0_ver",
     },
+    "unframed_hor": {
+        "8x10": "flat_8x10-inch-200x250-mm_170-gsm-65lb-uncoated_4-0_hor",
+        "11x14": "flat_11x14-inch-270x350-mm_170-gsm-65lb-uncoated_4-0_hor",
+        "16x20": "flat_16x20-inch-400x500-mm_170-gsm-65lb-uncoated_4-0_hor",
+        "18x24": "flat_18x24-inch-450x600-mm_170-gsm-65lb-uncoated_4-0_hor",
+        "24x36": "flat_24x36-inch-600x900-mm_170-gsm-65lb-uncoated_4-0_hor",
+    },
     "framed_black": {
         "8x10": "framed-poster_8x10-inch-200x250-mm_black_170-gsm-65lb-uncoated_4-0_ver",
         "11x14": "framed-poster_11x14-inch-280x355-mm_black_170-gsm-65lb-uncoated_4-0_ver",

@@ -1,0 +1,18 @@
+{
+  "name": "Vintage v3",
+  "description": "Vintage + waterway lines + wetlands (no farmland)",
+  "bg": "#EDE6DB",
+  "text": "#3D2817",
+  "gradient_color": "#EDE6DB",
+  "water": "#2E4A5F",
+  "parks": "#B8CAAD",
+  "wetland_fill": "#BFCFBA",
+  "waterway_line": "#2E4A5F",
+  "railway": "#6E6E6E",
+  "road_motorway": "#5C3828",
+  "road_primary": "#7A4935",
+  "road_secondary": "#A1614B",
+  "road_tertiary": "#C8856D",
+  "road_residential": "#D9B5A3",
+  "road_default": "#C8856D"
+}

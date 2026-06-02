@@ -1,0 +1,16 @@
+{
+  "name": "Dark Teal",
+  "description": "Dark teal/slate background with cream/gold roads - luxury dark atlas",
+  "bg": "#1A3A3E",
+  "text": "#D4C8A8",
+  "gradient_color": "#1A3A3E",
+  "water": "#122A2E",
+  "parks": "#1E4448",
+  "buildings": "#1A4044",
+  "road_motorway": "#D4C8A8",
+  "road_primary": "#C0B498",
+  "road_secondary": "#A89E88",
+  "road_tertiary": "#8A8270",
+  "road_residential": "#6A6458",
+  "road_default": "#A89E88"
+}

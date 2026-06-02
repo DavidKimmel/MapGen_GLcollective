@@ -29,11 +29,15 @@ SIZES = ["8x10", "11x14", "16x20", "18x24", "24x36"]
 DPI = 300
 RENDERS_DIR = os.path.join("etsy", "renders")
 
-# Cities to skip — open ocean dominates the frame
+# Cities to skip — ocean dominates frame OR too sparse for mosaic theme
 SKIP_CITIES: set[str] = {
+    # Coastal — ocean dominates
     "San Francisco", "San Diego", "Honolulu", "Miami", "Tampa",
     "Sydney", "Lisbon", "Istanbul", "Copenhagen", "Stockholm",
     "Los Angeles",
+    # Too sparse — suburbs/open space don't fill the mosaic well
+    "Asheville", "Boise", "Chattanooga", "Salt Lake City", "Savannah", "Seattle",
+    "Charleston",
 }
 
 # Florence-specific overrides: tighter extents, better centering.
@@ -96,6 +100,16 @@ FLORENCE_OVERRIDES: dict[str, dict] = {
     "Prague": {"distance": 5000},
     "Vienna": {"distance": 6000},
     "Florence": {"distance": 3500},
+    # --- Tier 6 (Florence expansion) ---
+    "Dallas": {"distance": 6000},
+    "Phoenix": {"distance": 7000},
+    "Indianapolis": {"distance": 5500},
+    "Mexico City": {"distance": 6000},
+    "Toronto": {"distance": 6000},
+    "Madrid": {"distance": 6000},
+    "Budapest": {"distance": 5500},
+    "Munich": {"distance": 4000},
+    "Milan": {"distance": 5500},
 }
 
 # Default distance multiplier for cities without explicit overrides

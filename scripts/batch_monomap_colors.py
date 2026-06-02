@@ -33,6 +33,9 @@ RENDERS_DIR = Path("etsy/renders")
 EXTRA_COLORS: dict[str, str] = {
     "terracotta": "#B5553A",
     "forest": "#2A5A2A",
+    "black": "#1A1A1A",
+    "charcoal": "#4A4A4A",
+    "dusty_rose": "#A35580",
 }
 
 # Sizes needed for mockups

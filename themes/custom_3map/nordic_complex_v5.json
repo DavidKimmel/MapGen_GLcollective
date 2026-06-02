@@ -1,0 +1,18 @@
+{
+  "name": "Nordic Complex v5",
+  "description": "Nordic v3 + leisure_extra (parks color). No farmland, no natural_fill, no cemetery/military.",
+  "bg": "#3A5A78",
+  "text": "#FFFFFF",
+  "gradient_color": "#3A5A78",
+  "water": "#FFFFFF",
+  "parks": "#4A7A6A",
+  "buildings": "#3E6080",
+  "leisure_extra": true,
+  "waterway_line": "#FFFFFF",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#F0F0F0",
+  "road_secondary": "#E0E0E0",
+  "road_tertiary": "#D0D0D0",
+  "road_residential": "#B8B8B8",
+  "road_default": "#D0D0D0"
+}

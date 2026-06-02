@@ -173,6 +173,7 @@ def apply_county_crop(
     target_crs: str,
     bg_color: str = "#FFFFFF",
     border_width: float = 2.0,
+    border_color: str | None = None,
 ) -> None:
     """Apply a county-boundary crop mask to the map axes.
 
@@ -213,18 +214,20 @@ def apply_county_crop(
     )
     ax.add_patch(mask_patch)
 
-    # Border stroke along county edge
-    border_verts, border_codes = _geometry_to_mpl_path(county_geom)
-    border_path = MplPath(border_verts, border_codes)
-    border_patch = PathPatch(
-        border_path,
-        transform=ax.transData,
-        facecolor="none",
-        edgecolor=_border_color(bg_color),
-        linewidth=border_width,
-        zorder=15,
-    )
-    ax.add_patch(border_patch)
+    # Border stroke along county edge (skipped when border_width <= 0)
+    if border_width > 0:
+        border_verts, border_codes = _geometry_to_mpl_path(county_geom)
+        border_path = MplPath(border_verts, border_codes)
+        edge = border_color if border_color is not None else _border_color(bg_color)
+        border_patch = PathPatch(
+            border_path,
+            transform=ax.transData,
+            facecolor="none",
+            edgecolor=edge,
+            linewidth=border_width,
+            zorder=15,
+        )
+        ax.add_patch(border_patch)
 
     safe_print(f"  County crop applied ({county_name}, {state})")
 

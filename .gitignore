@@ -55,3 +55,16 @@ etsy/.playwright_profile/
 
 # County data (large shapefiles)
 data/counties/
+
+# Experiment / one-off render trials (kept on disk, out of version control)
+scripts/render_harford_*
+scripts/experiment_*
+scripts/test_*
+scripts/_check_*
+scripts/*_montage.py
+scripts/compose_rot10_diag.py
+scripts/compose_rotation_comparison.py
+scripts/build_final_proofs.py
+
+# Generated logs
+etsy/atlasmap_connect_log.txt

@@ -125,6 +125,34 @@ _TITLE_FORMULAS: list[str] = [
     "{location} Map Print - Scandinavian Wall Art, Contemporary City Poster | {gift}",
 ]
 
+# Style-specific title formula overrides
+_STYLE_TITLE_FORMULAS: dict[str, list[str]] = {
+    "blueprint": [
+        "{location} Map Print | Blueprint Mosaic Wall Art, Detailed Street Map, {gift}",
+        "{location} Blueprint Map Poster | Shaded Mosaic City Art, Modern Wall Decor, {gift}",
+        "{city} Map Print | Blueprint Style Mosaic Poster, Choose Your Color, {gift}",
+        "Blueprint {city} Map Wall Art | Detailed Mosaic Street Map, {gift}",
+        "{location} Map Art | {gift}, Blueprint Mosaic City Poster, Shaded Block Art",
+        "{city} Blueprint Map Print | {region} City Mosaic Poster, {gift}",
+    ],
+    "florence": [
+        "{location} Map Print | Colorful Mosaic Wall Art, Abstract City Poster, {gift}",
+        "{location} Colorful Map Poster | Mosaic City Block Art, Modern Decor, {gift}",
+        "{city} Map Print | Vibrant Mosaic City Art, Colorful Street Map, {gift}",
+        "Colorful {city} Map Wall Art | Abstract Mosaic City Poster, {gift}",
+        "{location} Map Art | {gift}, Colorful Mosaic Poster, Abstract City Print",
+        "{city} Mosaic Map Print | {region} Colorful City Art, {gift}",
+    ],
+    "monomap": [
+        "{location} Map Print | Monochrome Wall Art, Choose Your Color, {gift}",
+        "{location} Monochrome Map Poster | Bold City Art, Minimalist Decor, {gift}",
+        "{city} Map Print | Monochrome City Poster, Choose Your Color, {gift}",
+        "Monochrome {city} Map Wall Art | Bold Minimalist City Poster, {gift}",
+        "{location} Map Art | {gift}, Monochrome City Print, Choose Your Color",
+        "{city} Monochrome Map Print | {region} Bold City Poster, {gift}",
+    ],
+}
+
 _GIFT_KEYWORDS: list[str] = [
     "Housewarming Gift",
     "New Home Gift",
@@ -478,8 +506,45 @@ _UNIVERSAL_TAGS = [
     "map print art",
 ]
 
+# Style-specific tag overrides (replace the universal tags)
+_STYLE_TAGS: dict[str, list[str]] = {
+    "blueprint": [
+        "city map print",
+        "blueprint map art",
+        "mosaic city print",
+        "housewarming gift",
+        "new home gift",
+        "detailed street map",
+        "city poster",
+        "modern wall art",
+        "map print art",
+    ],
+    "florence": [
+        "city map print",
+        "colorful map art",
+        "mosaic city poster",
+        "housewarming gift",
+        "new home gift",
+        "abstract city art",
+        "city poster",
+        "modern wall art",
+        "map print art",
+    ],
+    "monomap": [
+        "city map print",
+        "monochrome map art",
+        "minimalist city print",
+        "housewarming gift",
+        "new home gift",
+        "choose your color",
+        "city poster",
+        "modern wall art",
+        "map print art",
+    ],
+}
 
-def _generate_tags(city: CityListing) -> list[str]:
+
+def _generate_tags(city: CityListing, style: str | None = None) -> list[str]:
     """Generate 13 SEO tags for a city listing."""
     city_name = city.city.lower()
     city_tags = [
@@ -488,17 +553,19 @@ def _generate_tags(city: CityListing) -> list[str]:
         f"{city_name} poster",
         f"{city_name} gift",
     ]
-    return city_tags + _UNIVERSAL_TAGS
+    universal = _STYLE_TAGS.get(style, _UNIVERSAL_TAGS)
+    return city_tags + universal
 
 
 # ---------------------------------------------------------------------------
 # Title generation (Section 7.1 — max 140 chars)
 # ---------------------------------------------------------------------------
 
-def _generate_title(city: CityListing, variant_idx: int = 0) -> str:
+def _generate_title(city: CityListing, variant_idx: int = 0, style: str | None = None) -> str:
     """Generate an SEO-optimized title under 140 characters.
 
     Uses varied formula templates to avoid cookie-cutter titles across the shop.
+    Style-specific formulas used when style is provided.
     """
     if city.country == "USA" and city.state != "DC":
         location = f"{city.city} {city.state}"
@@ -511,7 +578,8 @@ def _generate_title(city: CityListing, variant_idx: int = 0) -> str:
         region = city.country
 
     gift = _GIFT_KEYWORDS[variant_idx % len(_GIFT_KEYWORDS)]
-    formula = _TITLE_FORMULAS[variant_idx % len(_TITLE_FORMULAS)]
+    formulas = _STYLE_TITLE_FORMULAS.get(style, _TITLE_FORMULAS)
+    formula = formulas[variant_idx % len(formulas)]
 
     title = formula.format(
         location=location,
@@ -522,9 +590,7 @@ def _generate_title(city: CityListing, variant_idx: int = 0) -> str:
 
     # Truncate if over 140 chars — progressively simplify
     if len(title) > 140:
-        title = f"{location} Map Print | Minimalist City Poster, {gift}"
-    if len(title) > 140:
-        title = f"{location} Map Print - Modern City Wall Art | {gift}"
+        title = f"{location} Map Print | Modern City Wall Art, {gift}"
     if len(title) > 140:
         title = f"{location} Map Print | {gift}"
 
@@ -667,20 +733,30 @@ def _generate_variants(city: CityListing) -> list[ListingVariant]:
 def generate_listing(
     city: CityListing,
     variant_idx: int = 0,
+    style: str | None = None,
 ) -> dict:
     """Generate a complete Etsy listing data structure for a city.
 
     Args:
         city: CityListing from city_list.py
         variant_idx: Index for rotating quality descriptors / gift occasions
+        style: Style name ("classic", "blueprint", "florence", "monomap") for
+               style-specific titles, tags, and descriptions. None = Classic.
 
     Returns:
         Dict with title, description, tags, price, variants, and metadata.
     """
-    title = _generate_title(city, variant_idx)
+    title = _generate_title(city, variant_idx, style=style)
     description = _generate_description(city)
-    tags = _generate_tags(city)
+    tags = _generate_tags(city, style=style)
     variants = _generate_variants(city)
+
+    theme_map = {
+        "classic": "37th_parallel",
+        "blueprint": "blueprint",
+        "florence": "florence",
+        "monomap": "monomap",
+    }
 
     return {
         "city": city.city,
@@ -695,7 +771,7 @@ def generate_listing(
         "lat": city.lat,
         "lon": city.lon,
         "distance": city.distance,
-        "theme": "37th_parallel",
+        "theme": theme_map.get(style, "37th_parallel"),
         "slug": city.slug,
     }
 
@@ -731,18 +807,24 @@ def _format_display(fmt: str) -> str:
     return _MAP.get(fmt, fmt)
 
 
-def export_listing_text(city: CityListing, variant_idx: int = 0) -> str:
+def export_listing_text(
+    city: CityListing, variant_idx: int = 0, style: str | None = None,
+    output_dir: str | None = None,
+) -> str:
     """Generate the _listing.txt cheat sheet for a city.
+
+    Args:
+        output_dir: Directory to write to. Defaults to etsy/renders/{city_slug}/.
 
     Returns the output file path.
     """
-    listing = generate_listing(city, variant_idx)
-    renders_dir = Path(__file__).parent / "renders" / city.slug
+    listing = generate_listing(city, variant_idx, style=style)
+    renders_dir = Path(output_dir) if output_dir else Path(__file__).parent / "renders" / city.slug
     renders_dir.mkdir(parents=True, exist_ok=True)
     out_path = renders_dir / f"{city.slug}_listing.txt"
 
-    # Collect mockup and image files
-    mockups = sorted(renders_dir.glob("mockup_*.jpg"))
+    # Collect mockup and image files from the output directory
+    mockups = sorted(renders_dir.glob(f"{city.slug}_*.jpg")) + sorted(renders_dir.glob("mockup_*.jpg"))
     detail_crop = renders_dir / f"{city.slug}_detail_crop.jpg"
     size_comp = renders_dir / f"{city.slug}_size_comparison.png"
 
@@ -811,13 +893,19 @@ def export_listing_text(city: CityListing, variant_idx: int = 0) -> str:
     return str(out_path)
 
 
-def export_variations_text(city: CityListing, variant_idx: int = 0) -> str:
+def export_variations_text(
+    city: CityListing, variant_idx: int = 0, style: str | None = None,
+    output_dir: str | None = None,
+) -> str:
     """Generate the _variations.txt file for a city.
+
+    Args:
+        output_dir: Directory to write to. Defaults to etsy/renders/{city_slug}/.
 
     Returns the output file path.
     """
-    listing = generate_listing(city, variant_idx)
-    renders_dir = Path(__file__).parent / "renders" / city.slug
+    listing = generate_listing(city, variant_idx, style=style)
+    renders_dir = Path(output_dir) if output_dir else Path(__file__).parent / "renders" / city.slug
     renders_dir.mkdir(parents=True, exist_ok=True)
     out_path = renders_dir / f"{city.slug}_variations.txt"
 
