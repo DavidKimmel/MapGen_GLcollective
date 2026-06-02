@@ -93,7 +93,7 @@ def parse_location(location: str) -> tuple[float, float, object | None]:
     safe_print(f"  Geocoding '{location}'...")
     geolocator = Nominatim(user_agent="mapgen_poster", timeout=10)
     time.sleep(1)
-    result = geolocator.geocode(location, addressdetails=True)
+    result = geolocator.geocode(location, addressdetails=True, language="en")
     if result is None:
         raise ValueError(f"Could not geocode location: {location}")
 
@@ -102,7 +102,11 @@ def parse_location(location: str) -> tuple[float, float, object | None]:
 
 
 def extract_city_state(geocode_result) -> tuple[str | None, str | None]:
-    """Extract city name and state/country from a Nominatim result."""
+    """Extract city name and state/country from a Nominatim result.
+
+    Prefers structured address fields (city/town/village) over display_name
+    to avoid local-language names (Wien, Greater London, etc).
+    """
     if geocode_result is None:
         return None, None
 
@@ -110,20 +114,27 @@ def extract_city_state(geocode_result) -> tuple[str | None, str | None]:
     display = geocode_result.raw.get("display_name", "")
     first_part = display.split(",")[0].strip() if display else ""
 
-    if first_part and not first_part[0].isdigit():
-        city = first_part
-    else:
-        city = (
-            addr.get("city")
-            or addr.get("town")
-            or addr.get("village")
-            or addr.get("borough")
-            or addr.get("suburb")
-            or addr.get("county")
-            or addr.get("municipality")
-            or first_part
-            or "Unknown"
-        )
+    # Prefer structured address fields — these return cleaner English names
+    city = (
+        addr.get("city")
+        or addr.get("town")
+        or addr.get("village")
+        or addr.get("borough")
+        or addr.get("suburb")
+        or addr.get("municipality")
+    )
+
+    # Fallback to display_name first part
+    if not city:
+        if first_part and not first_part[0].isdigit():
+            city = first_part
+        else:
+            city = "Unknown"
+
+    # Strip common administrative prefixes that Nominatim adds
+    for prefix in ("Greater ", "City of ", "Borough of ", "Municipality of "):
+        if city.startswith(prefix):
+            city = city[len(prefix):]
 
     country_code = addr.get("country_code", "").upper()
     if country_code == "US":

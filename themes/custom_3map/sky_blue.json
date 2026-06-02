@@ -1,0 +1,16 @@
+{
+  "name": "Sky Blue",
+  "description": "Darker blue land mass with white streets carved through, white water",
+  "bg": "#8AACBE",
+  "text": "#1A3A50",
+  "gradient_color": "#8AACBE",
+  "water": "#FFFFFF",
+  "parks": "#7EA0B2",
+  "buildings": "#82A4B6",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#EEF4F8",
+  "road_secondary": "#E0ECF2",
+  "road_tertiary": "#D4E2EA",
+  "road_residential": "#C8D8E2",
+  "road_default": "#E0ECF2"
+}

@@ -41,10 +41,16 @@ def get_florence_cities() -> list[str]:
 
 
 def find_florence_render(slug: str, size: str) -> Path | None:
-    """Find a Florence render for a city at a given size."""
+    """Find a Florence render for a city at a given size.
+    Checks both active renders dir and FlorenceMap_Posted/.
+    """
     path = RENDERS_DIR / f"{slug}_florence" / f"{slug}_{size}.png"
     if path.exists():
         return path
+    # Check Posted folder
+    posted = RENDERS_DIR / "FlorenceMap_Posted" / f"{slug}_florence" / f"{slug}_{size}.png"
+    if posted.exists():
+        return posted
     return None
 
 

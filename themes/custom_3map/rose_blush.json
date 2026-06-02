@@ -1,0 +1,16 @@
+{
+  "name": "Rose Blush",
+  "description": "Pink/rose tones - dark pink land mass with white roads and white water",
+  "bg": "#D4899E",
+  "text": "#5A1A30",
+  "gradient_color": "#D4899E",
+  "water": "#FFFFFF",
+  "parks": "#C87A90",
+  "buildings": "#CC8094",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#F5E8EC",
+  "road_secondary": "#F0DDE4",
+  "road_tertiary": "#ECD0D8",
+  "road_residential": "#E8C4D0",
+  "road_default": "#F0DDE4"
+}

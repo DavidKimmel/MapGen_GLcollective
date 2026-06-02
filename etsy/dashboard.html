@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoLine Collective — Dashboard</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e0e0e0; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 1.8em; color: #fff; margin-bottom: 5px; }
+    .subtitle { color: #888; margin-bottom: 30px; font-size: 0.9em; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .card { background: #1a1d27; border-radius: 12px; padding: 20px; border: 1px solid #2a2d37; }
+    .card-label { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+    .card-value { font-size: 2.2em; font-weight: 700; color: #fff; margin-top: 5px; }
+    .card-value.green { color: #4ade80; }
+    .card-value.blue { color: #60a5fa; }
+    .card-value.purple { color: #a78bfa; }
+    .card-value.amber { color: #fbbf24; }
+
+    .section { background: #1a1d27; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #2a2d37; }
+    .section h2 { font-size: 1.1em; color: #fff; margin-bottom: 15px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+    th { text-align: left; padding: 10px 12px; color: #888; border-bottom: 1px solid #2a2d37; font-weight: 500; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px; }
+    td { padding: 8px 12px; border-bottom: 1px solid #1f222e; }
+    tr:hover { background: #1f222e; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; }
+    .badge-classic { background: #2a3a2a; color: #86efac; }
+    .badge-florence { background: #3a2a2a; color: #fca5a5; }
+    .badge-blueprint { background: #2a2a3a; color: #93c5fd; }
+    .badge-monomap { background: #3a3a2a; color: #fde68a; }
+    .badge-countymap { background: #2a3a3a; color: #5eead4; }
+    .badge-custom { background: #3a2a3a; color: #d8b4fe; }
+    .badge-customhouse { background: #3a3020; color: #fdba74; }
+
+    .status { padding: 3px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; }
+    .status-completed { background: #1a3a2a; color: #4ade80; }
+    .status-open { background: #3a3a1a; color: #fbbf24; }
+    .status-paid { background: #2a2a3a; color: #93c5fd; }
+
+    .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .listing-card { background: #22252f; border-radius: 10px; overflow: hidden; border: 1px solid #2a2d37; text-decoration: none; color: #e0e0e0; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column; }
+    .listing-card:hover { border-color: #60a5fa; transform: translateY(-2px); }
+    .listing-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .listing-thumb-placeholder { width: 100%; aspect-ratio: 1; background: #2a2d37; }
+    .listing-card-body { padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .listing-card-title { font-size: 0.8em; line-height: 1.3; color: #ccc; }
+    .listing-card-stats { display: flex; gap: 12px; font-size: 0.75em; color: #888; margin-top: auto; }
+
+    .footer { text-align: center; color: #555; font-size: 0.8em; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>GeoLine Collective</h1>
+    <p class="subtitle">Dashboard updated 2026-04-11 16:05</p>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-label">Active Listings</div>
+            <div class="card-value blue">218</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Total Views</div>
+            <div class="card-value purple">278</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Favorites</div>
+            <div class="card-value amber">10</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Orders</div>
+            <div class="card-value green">4</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Revenue</div>
+            <div class="card-value green">$79.53</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Order</div>
+            <div class="card-value">$19.88</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Product Lines</h2>
+        <table>
+            <thead><tr><th>Product</th><th>Listings</th><th>Views</th><th>Favs</th><th>Avg Views</th></tr></thead>
+            <tbody>
+            <tr>
+                <td><span class="badge badge-florence">Florence</span></td>
+                <td>97</td>
+                <td>90</td>
+                <td>9</td>
+                <td>0.9</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-classic">Classic</span></td>
+                <td>17</td>
+                <td>55</td>
+                <td>0</td>
+                <td>3.2</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-customhouse">Custom House</span></td>
+                <td>39</td>
+                <td>55</td>
+                <td>1</td>
+                <td>1.4</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-custom">Custom</span></td>
+                <td>3</td>
+                <td>39</td>
+                <td>0</td>
+                <td>13.0</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-monomap">MonoMap</span></td>
+                <td>60</td>
+                <td>36</td>
+                <td>0</td>
+                <td>0.6</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-countymap">CountyMap</span></td>
+                <td>2</td>
+                <td>3</td>
+                <td>0</td>
+                <td>1.5</td>
+            </tr></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Top Listings by Views</h2>
+        <div class="listing-grid">
+            
+            <a href="https://www.etsy.com/listing/4482153934" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/270539/7926098567/il_570xN.7926098567_ajsf.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Custom City Map Print | Personalized Map Art | 12 Style</div>
+                    <span class="badge badge-custom">Custom</span>
+                    <div class="listing-card-stats">
+                        <span>24 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4481237944" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/1df62e/7949543475/il_570xN.7949543475_dvt8.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Monochrome Minneapolis Map Print | Bold City Wall Art, </div>
+                    <span class="badge badge-monomap">MonoMap</span>
+                    <div class="listing-card-stats">
+                        <span>21 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4475865869" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/9e159b/7830765252/il_570xN.7830765252_qk6x.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Berlin Map Wall Art, Colorful Abstract City Poster, Mos</div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>21 views</span>
+                        <span>1 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4475873834" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/76c7d8/7830771786/il_570xN.7830771786_f3bf.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Milan Map Wall Art, Colorful Abstract City Poster, Mosa</div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>12 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4464879077" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/47758b/7933229581/il_570xN.7933229581_c40m.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Washington DC Map Print – City Street Cartography Wall </div>
+                    <span class="badge badge-customhouse">Custom House</span>
+                    <div class="listing-card-stats">
+                        <span>12 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4471947164" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/094062/7878300300/il_570xN.7878300300_b6l4.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Personalized Date Night Map | Where We First Met Gift |</div>
+                    <span class="badge badge-custom">Custom</span>
+                    <div class="listing-card-stats">
+                        <span>11 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4467270309" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/537e8b/7933225569/il_570xN.7933225569_hgir.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Denver Colorado Street Map Print – Detailed Modern Wall</div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>10 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4466923960" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/dd7152/7885263576/il_570xN.7885263576_3sjx.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Salt Lake City Utah Map Print – Modern City Street Cart</div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>9 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4475874286" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/a0e2ca/7830775682/il_570xN.7830775682_8fzg.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Rome Map Wall Art, Colorful Abstract City Poster, Mosai</div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>8 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4472894258" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/feae25/7811586508/il_570xN.7811586508_rabb.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Amsterdam Netherlands Map Print | Minimalist City Poste</div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>8 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4473524147" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/610a70/7863665759/il_570xN.7863665759_sg43.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Atlanta Map Poster | Black and White City Art Print, Ga</div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>6 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4479412422" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/8e4b7e/7902116335/il_570xN.7902116335_n5m5.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Custom City Map Poster, Minimalist Monochrome Print, Pe</div>
+                    <span class="badge badge-monomap">MonoMap</span>
+                    <div class="listing-card-stats">
+                        <span>6 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4475866849" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/ec8b3e/7880318951/il_570xN.7880318951_ekb1.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Munich Map Print, Colorful City Block Mosaic Wall Art, </div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>6 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4472966353" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/1ffda9/7860065365/il_570xN.7860065365_f16y.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">London City Map Wall Art - UK Travel Poster Print | Off</div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>6 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4465131083" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/3dc73c/7885263994/il_570xN.7885263994_398w.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Seattle Washington Map Print – City Street Cartography </div>
+                    <span class="badge badge-classic">Classic</span>
+                    <div class="listing-card-stats">
+                        <span>6 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4481236373" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/915260/7901626992/il_570xN.7901626992_8kp0.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Washington DC Monochrome Map Wall Art | Bold City Poste</div>
+                    <span class="badge badge-monomap">MonoMap</span>
+                    <div class="listing-card-stats">
+                        <span>5 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4480059059" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/550329/7906546303/il_570xN.7906546303_5m7u.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Paris Map Poster, Detailed Mosaic City Art, Shaded Stre</div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>5 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4480056149" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/33362e/7906524899/il_570xN.7906524899_enct.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Houston Map Print, Detailed Mosaic Wall Art, Shaded Cit</div>
+                    <span class="badge badge-florence">Florence</span>
+                    <div class="listing-card-stats">
+                        <span>5 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4467273172" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/501e7a/7885261798/il_570xN.7885261798_qztg.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Minneapolis Minnesota Map Print - Detailed Street Map W</div>
+                    <span class="badge badge-customhouse">Custom House</span>
+                    <div class="listing-card-stats">
+                        <span>5 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.etsy.com/listing/4465658744" target="_blank" class="listing-card">
+                <img src="https://i.etsystatic.com/64614087/r/il/1a6496/7885264672/il_570xN.7885264672_a9ue.jpg" alt="" class="listing-thumb">
+                <div class="listing-card-body">
+                    <div class="listing-card-title">Savannah Georgia Map Print - Modern City Map Wall Art |</div>
+                    <span class="badge badge-customhouse">Custom House</span>
+                    <div class="listing-card-stats">
+                        <span>5 views</span>
+                        <span>0 favs</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Orders</h2>
+        <table>
+            <thead><tr><th>Date</th><th>Order ID</th><th>Buyer</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+            <tr>
+                <td>2026-04-07</td>
+                <td>4022215894</td>
+                <td>Larkin Clem</td>
+                <td>$5.32</td>
+                <td><span class="status status-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td>2026-04-06</td>
+                <td>4024525375</td>
+                <td>MaKayla Sabey</td>
+                <td>$9.34</td>
+                <td><span class="status status-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td>2026-04-01</td>
+                <td>4016732822</td>
+                <td>Elise Quinn</td>
+                <td>$30.95</td>
+                <td><span class="status status-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td>2026-03-03</td>
+                <td>3993677285</td>
+                <td>Elise Quinn</td>
+                <td>$33.92</td>
+                <td><span class="status status-completed">Completed</span></td>
+            </tr></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Transaction Details</h2>
+        <table>
+            <thead><tr><th>Date</th><th>Item</th><th>Price</th><th>Qty</th></tr></thead>
+            <tbody>
+            <tr>
+                <td>2026-04-07</td>
+                <td>Monochrome Minneapolis Map Print | Bold City Wall </td>
+                <td>$5.04</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>2026-04-06</td>
+                <td>Salt Lake City Utah Map Print – Modern City Street</td>
+                <td>$4.49</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>2026-04-01</td>
+                <td>Custom City Map Poster, Minimalist Monochrome Prin</td>
+                <td>$50.99</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>2026-04-01</td>
+                <td>Washington DC Map Wall Art, Shaded Mosaic Street M</td>
+                <td>$46.35</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>2026-04-06</td>
+                <td>Atlanta Map Poster | Black and White City Art Prin</td>
+                <td>$4.20</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>2026-03-03</td>
+                <td>Seattle Washington Map Print – City Street Cartogr</td>
+                <td>$32.00</td>
+                <td>1</td>
+            </tr></tbody>
+        </table>
+    </div>
+
+    <p class="footer">GeoLine Collective &mdash; Cartography as Craft &mdash; 2026-04-11 16:05</p>
+</div>
+</body>
+</html>

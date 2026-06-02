@@ -1,0 +1,16 @@
+{
+  "name": "Teal Coral",
+  "description": "Bold teal water with warm cream land and coral/salmon roads - vibrant contrast",
+  "bg": "#F0E8DC",
+  "text": "#1A6A5E",
+  "gradient_color": "#F0E8DC",
+  "water": "#18A08A",
+  "parks": "#E8E0D0",
+  "buildings": "#EAE2D4",
+  "road_motorway": "#E06050",
+  "road_primary": "#E87868",
+  "road_secondary": "#F09888",
+  "road_tertiary": "#F4B0A4",
+  "road_residential": "#F8C8BE",
+  "road_default": "#F09888"
+}

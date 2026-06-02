@@ -118,8 +118,9 @@ STREET_WEIGHTS: dict[str, float] = {
     "service": 0.3, "living_street": 0.4,
 }
 
-# Highway types to filter out — creates noise in parks/hills without adding structure
-DROP_HIGHWAY: set[str] = {"footway", "path", "track", "cycleway", "steps", "pedestrian", "corridor"}
+# Highway types to filter out — service/living_street create micro-polygons that clutter the mosaic
+DROP_HIGHWAY: set[str] = {"footway", "path", "track", "cycleway", "steps", "pedestrian", "corridor",
+                          "service", "living_street"}
 
 
 def _road_weight(row) -> float:

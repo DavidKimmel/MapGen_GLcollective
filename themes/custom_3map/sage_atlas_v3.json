@@ -1,0 +1,18 @@
+{
+  "name": "Sage Atlas v3",
+  "description": "Sage Atlas + waterway lines + wetlands",
+  "bg": "#9EAA98",
+  "text": "#2C3828",
+  "gradient_color": "#9EAA98",
+  "water": "#C8D8E0",
+  "parks": "#8E9E88",
+  "buildings": "#94A08E",
+  "wetland_fill": "#B5C2AC",
+  "waterway_line": "#C8D8E0",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#F0F0EA",
+  "road_secondary": "#E2E4DC",
+  "road_tertiary": "#D4D8CE",
+  "road_residential": "#C8CCC2",
+  "road_default": "#E2E4DC"
+}

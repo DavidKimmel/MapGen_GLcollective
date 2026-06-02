@@ -1,0 +1,17 @@
+{
+  "name": "Nordic Complex v3",
+  "description": "Nordic Complex + waterway lines + wetlands (no farmland)",
+  "bg": "#3A5A78",
+  "text": "#FFFFFF",
+  "gradient_color": "#3A5A78",
+  "water": "#FFFFFF",
+  "parks": "#4A7A6A",
+  "buildings": "#3E6080",
+  "waterway_line": "#FFFFFF",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#F0F0F0",
+  "road_secondary": "#E0E0E0",
+  "road_tertiary": "#D0D0D0",
+  "road_residential": "#B8B8B8",
+  "road_default": "#D0D0D0"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Sage Atlas",
+  "description": "Dark sage/olive green land mass with white roads and light blue water - classic atlas feel",
+  "bg": "#9EAA98",
+  "text": "#2C3828",
+  "gradient_color": "#9EAA98",
+  "water": "#C8D8E0",
+  "parks": "#8E9E88",
+  "buildings": "#94A08E",
+  "road_motorway": "#FFFFFF",
+  "road_primary": "#F0F0EA",
+  "road_secondary": "#E2E4DC",
+  "road_tertiary": "#D4D8CE",
+  "road_residential": "#C8CCC2",
+  "road_default": "#E2E4DC"
+}

@@ -35,7 +35,7 @@ class CityListing:
 TIER_1: list[CityListing] = [
     CityListing(
         city="Chicago", state="Illinois", country="USA",
-        lat=41.8781, lon=-87.6298, distance=10000, tier=1,
+        lat=41.8756, lon=-87.6244, distance=10000, tier=1,
         hero_feature="Lakefront + the Loop dense grid",
     ),
     CityListing(
@@ -46,18 +46,18 @@ TIER_1: list[CityListing] = [
     ),
     CityListing(
         city="Washington DC", state="DC", country="USA",
-        lat=38.9072, lon=-77.0369, distance=8000, tier=1,
+        lat=38.8950, lon=-77.0365, distance=8000, tier=1,
         hero_feature="L'Enfant radial grid overlaid on blocks",
         display_city="Washington DC", display_subtitle="United States",
     ),
     CityListing(
         city="New Orleans", state="Louisiana", country="USA",
-        lat=29.9511, lon=-90.0715, distance=8000, tier=1,
+        lat=29.9561, lon=-90.0734, distance=8000, tier=1,
         hero_feature="The Crescent — river bend around French Quarter",
     ),
     CityListing(
         city="Nashville", state="Tennessee", country="USA",
-        lat=36.1627, lon=-86.7816, distance=8000, tier=1,
+        lat=36.1623, lon=-86.7743, distance=8000, tier=1,
         hero_feature="Cumberland River curves through city",
     ),
     CityListing(
@@ -72,12 +72,12 @@ TIER_1: list[CityListing] = [
     ),
     CityListing(
         city="San Francisco", state="California", country="USA",
-        lat=37.7749, lon=-122.4194, distance=8000, tier=1,
+        lat=37.7879, lon=-122.4075, distance=8000, tier=1,
         hero_feature="Bay + grid compressed by hills + Golden Gate",
     ),
     CityListing(
         city="Portland", state="Oregon", country="USA",
-        lat=45.5152, lon=-122.6784, distance=8000, tier=1,
+        lat=45.5202, lon=-122.6742, distance=8000, tier=1,
         hero_feature="Willamette River splits city grid",
     ),
     CityListing(
@@ -98,12 +98,12 @@ TIER_2: list[CityListing] = [
     ),
     CityListing(
         city="Miami", state="Florida", country="USA",
-        lat=25.7617, lon=-80.1918, distance=10000, tier=2,
+        lat=25.7742, lon=-80.1936, distance=10000, tier=2,
         hero_feature="Barrier island geography + Biscayne Bay",
     ),
     CityListing(
         city="Atlanta", state="Georgia", country="USA",
-        lat=33.7490, lon=-84.3880, distance=10000, tier=2,
+        lat=33.7545, lon=-84.3898, distance=10000, tier=2,
         hero_feature="Sprawling radial street system",
     ),
     CityListing(
@@ -113,7 +113,7 @@ TIER_2: list[CityListing] = [
     ),
     CityListing(
         city="Pittsburgh", state="Pennsylvania", country="USA",
-        lat=40.4406, lon=-79.9959, distance=7000, tier=2,
+        lat=40.4407, lon=-80.0026, distance=7000, tier=2,
         hero_feature="Three rivers confluence",
     ),
     CityListing(
@@ -123,7 +123,7 @@ TIER_2: list[CityListing] = [
     ),
     CityListing(
         city="Charleston", state="South Carolina", country="USA",
-        lat=32.7765, lon=-79.9311, distance=6000, tier=2,
+        lat=32.7884, lon=-79.9399, distance=6000, tier=2,
         hero_feature="Peninsula city + historic street grid",
     ),
     CityListing(
@@ -199,25 +199,25 @@ TIER_4: list[CityListing] = [
     ),
     CityListing(
         city="Rome", state="Lazio", country="Italy",
-        lat=41.9028, lon=12.4964, distance=10000, tier=4,
+        lat=41.8933, lon=12.4829, distance=10000, tier=4,
         hero_feature="Tiber River + ancient radial streets",
         display_subtitle="Italy",
     ),
     CityListing(
         city="Barcelona", state="Catalonia", country="Spain",
-        lat=41.3874, lon=2.1686, distance=10000, tier=4,
+        lat=41.3826, lon=2.1771, distance=10000, tier=4,
         hero_feature="Eixample superblock grid + Gothic quarter contrast",
         display_subtitle="Spain",
     ),
     CityListing(
         city="Amsterdam", state="North Holland", country="Netherlands",
-        lat=52.3676, lon=4.9041, distance=8000, tier=4,
+        lat=52.3731, lon=4.8925, distance=8000, tier=4,
         hero_feature="Concentric canal rings",
         display_subtitle="Netherlands",
     ),
     CityListing(
         city="Lisbon", state="Lisboa", country="Portugal",
-        lat=38.7223, lon=-9.1393, distance=8000, tier=4,
+        lat=38.7078, lon=-9.1366, distance=8000, tier=4,
         hero_feature="Hillside streets + Tagus riverfront",
         display_subtitle="Portugal",
     ),
@@ -266,7 +266,7 @@ TIER_5: list[CityListing] = [
     ),
     CityListing(
         city="St. Louis", state="Missouri", country="USA",
-        lat=38.6270, lon=-90.1994, distance=8000, tier=5,
+        lat=38.6254, lon=-90.1900, distance=8000, tier=5,
         hero_feature="Mississippi River + downtown grid near Gateway Arch",
         display_city="St. Louis", display_subtitle="Missouri",
     ),
@@ -277,7 +277,7 @@ TIER_5: list[CityListing] = [
     ),
     CityListing(
         city="Tampa", state="Florida", country="USA",
-        lat=27.9506, lon=-82.4572, distance=10000, tier=5,
+        lat=27.9450, lon=-82.4583, distance=10000, tier=5,
         hero_feature="Tampa Bay peninsula + Hillsborough River",
     ),
     CityListing(
@@ -298,7 +298,7 @@ TIER_5: list[CityListing] = [
     # World cities
     CityListing(
         city="Berlin", state="Berlin", country="Germany",
-        lat=52.5200, lon=13.4050, distance=10000, tier=5,
+        lat=52.5174, lon=13.3951, distance=10000, tier=5,
         hero_feature="Spree River + Tiergarten void + unified grid",
         display_subtitle="Germany",
     ),
@@ -316,7 +316,7 @@ TIER_5: list[CityListing] = [
     ),
     CityListing(
         city="Prague", state="Bohemia", country="Czech Republic",
-        lat=50.0755, lon=14.4378, distance=8000, tier=5,
+        lat=50.0875, lon=14.4213, distance=8000, tier=5,
         hero_feature="Vltava River bends + medieval street web",
         display_subtitle="Czech Republic",
     ),
@@ -328,7 +328,7 @@ TIER_5: list[CityListing] = [
     ),
     CityListing(
         city="Copenhagen", state="Hovedstaden", country="Denmark",
-        lat=55.6761, lon=12.5683, distance=8000, tier=5,
+        lat=55.6867, lon=12.5701, distance=8000, tier=5,
         hero_feature="Harbor + canal district + Christiania",
         display_subtitle="Denmark",
     ),
@@ -358,7 +358,64 @@ TIER_5: list[CityListing] = [
     ),
 ]
 
-ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3 + TIER_4 + TIER_5
+# ---------------------------------------------------------------------------
+# Tier 6 — Florence Theme Expansion (US + World metros)
+# ---------------------------------------------------------------------------
+TIER_6: list[CityListing] = [
+    CityListing(
+        city="Dallas", state="Texas", country="USA",
+        lat=32.7767, lon=-96.7970, distance=10000, tier=6,
+        hero_feature="Dense downtown grid + Trinity River greenbelt",
+    ),
+    CityListing(
+        city="Phoenix", state="Arizona", country="USA",
+        lat=33.4484, lon=-112.0740, distance=10000, tier=6,
+        hero_feature="Ultra-regular grid + canal system",
+    ),
+    CityListing(
+        city="Indianapolis", state="Indiana", country="USA",
+        lat=39.7684, lon=-86.1581, distance=8000, tier=6,
+        hero_feature="Monument Circle + radial avenues through grid",
+    ),
+    CityListing(
+        city="Mexico City", state="CDMX", country="Mexico",
+        lat=19.4326, lon=-99.1332, distance=10000, tier=6,
+        hero_feature="Dense organic center + Reforma boulevard + Chapultepec park",
+        display_subtitle="Mexico",
+    ),
+    CityListing(
+        city="Toronto", state="Ontario", country="Canada",
+        lat=43.6532, lon=-79.3832, distance=10000, tier=6,
+        hero_feature="Lakefront grid + ravine network",
+        display_subtitle="Canada",
+    ),
+    CityListing(
+        city="Madrid", state="Community of Madrid", country="Spain",
+        lat=40.4168, lon=-3.7038, distance=10000, tier=6,
+        hero_feature="Radial avenues + Retiro Park void + dense historic center",
+        display_subtitle="Spain",
+    ),
+    CityListing(
+        city="Budapest", state="Budapest", country="Hungary",
+        lat=47.4814, lon=19.1458, distance=8000, tier=6,
+        hero_feature="Danube River splits Buda hills from Pest grid",
+        display_subtitle="Hungary",
+    ),
+    CityListing(
+        city="Munich", state="Bavaria", country="Germany",
+        lat=48.1371, lon=11.5754, distance=8000, tier=6,
+        hero_feature="Ring roads + Isar River + Englischer Garten void",
+        display_subtitle="Germany",
+    ),
+    CityListing(
+        city="Milan", state="Lombardy", country="Italy",
+        lat=45.4642, lon=9.1900, distance=8000, tier=6,
+        hero_feature="Concentric ring roads + radial avenues from Duomo",
+        display_subtitle="Italy",
+    ),
+]
+
+ALL_CITIES: list[CityListing] = TIER_1 + TIER_2 + TIER_3 + TIER_4 + TIER_5 + TIER_6
 
 
 def get_cities_by_tier(tier: int) -> list[CityListing]:

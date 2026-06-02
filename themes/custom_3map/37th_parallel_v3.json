@@ -1,0 +1,20 @@
+{
+  "name": "37th Parallel v3",
+  "description": "Classic 37th Parallel + waterway lines, no waterway outline",
+  "bg": "#FCFCFA",
+  "text": "#2C2C2C",
+  "gradient_color": "#FCFCFA",
+  "water": "#B6D6E2",
+  "parks": "#B8D4AC",
+  "buildings": "#F0F0E6",
+  "wetland_fill": "#C4DDD4",
+  "waterway_line": "#9DC2D4",
+  "coastline_stroke": "#888888",
+  "road_motorway": "#1A1A1A",
+  "road_primary": "#2A2A2A",
+  "road_secondary": "#3D3D3D",
+  "road_tertiary": "#4A4A4A",
+  "road_residential": "#555555",
+  "road_default": "#555555",
+  "ocean": true
+}
